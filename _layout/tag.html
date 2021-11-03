@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  {{insert styling.html}}
+
+  <title>Tag: {{fill fd_tag}}</title>
+</head>
+<body>
+  {{insert header.html}}
+  <div class="franklin-content">
+    Posts with tag: <i>{{fill fd_tag}}</i>
+    {{taglist}}
+    {{insert page_foot.html}}
+  </div>
+</body>
+</html>
