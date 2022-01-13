@@ -1,5 +1,4 @@
-@def title = "Franklin Example"
-@def tags = ["syntax", "code"]
+@def title = "/var/log/fjebaker.log"
 
 # Chronological posts
 
