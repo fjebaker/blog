@@ -1,6 +1,7 @@
 +++
 author = "Fergus Baker"
 mintoclevel = 2
+prepath = "blog"
 
 ignore = ["node_modules/"]
 
