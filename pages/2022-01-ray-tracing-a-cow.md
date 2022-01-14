@@ -7,7 +7,7 @@
 # Ray-tracing meshes in curved geometries
 
 
-I've recently refactored [some software](https://github.com/astro-group-bristol/GeodesicTracer.jl) I'm hoping to use to calculate reverberation lags around accreting black holes and X-ray binaries, which split up a monolithic project into more manageable packages. In specific, [AccretionGeometry.jl](https://github.com/astro-group-bristol/AccretionGeometry.jl) now handles all of the intersection calculations between geodesics and discs, but, also, _much more_. An intention has always been to later incorporate MHD simulations of accretion discs into the ray-tracer, to more accurately model light curves coming from accreting objects, which are commonly exported as some kind of mesh -- which means learning how to use mesh files in Julia.
+I've recently refactored [some software](https://github.com/astro-group-bristol/GeodesicTracer.jl) I'm hoping to use to calculate reverberation lags around accreting black holes and X-ray binaries, which split up a monolithic project into more manageable packages. In specific, [AccretionGeometry.jl](https://github.com/astro-group-bristol/AccretionGeometry.jl) now handles all of the intersection calculations between geodesics and discs, but, also, _much more_. An intention has always been to later incorporate MHD simulations of accretion discs into the ray-tracer, to more accurately model light curves coming from accreting objects, which are commonly exported as some kind of mesh -- and so provides an excuse to learn how to use mesh files in Julia.
 
 ~~~
 <h2>Overview</h2>
@@ -16,9 +16,9 @@ I've recently refactored [some software](https://github.com/astro-group-bristol/
 
 ## Meshes and intersections
 
-JuliaGeometry have [Meshes.jl](https://github.com/JuliaGeometry/Meshes.jl) for computational geometry and meshing algorithms, which supplies a `has_intersect` function, return `true` or `false` if one geometric object intersects with another. In practice, I was unable to get this to work with a `Segment` and a `Mesh`, so, instead, opted to try and implement my own algorithm. 
+JuliaGeometry have [Meshes.jl](https://github.com/JuliaGeometry/Meshes.jl) for computational geometry and meshing algorithms, which supplies a `has_intersect` function, returning `true` or `false` if one geometric object intersects with another. In practice, I was unable to get this to work with the `Segment` and `Mesh` type, so, instead, opted to try and implement my own algorithm. 
 
-Mesh files (such as `.obj` files) define a series of vertices and faces which connect them, effectively reducing some geometry into a collection of triangles. JuliaIO has the package [MeshIO](https://github.com/JuliaIO/MeshIO.jl) for importing various mesh file formats into a standardized `GeometryBasics.Mesh` struct, which can be visualized with Makie.jl:
+Mesh files (such as `.obj` files) define a series of vertices and the faces that connect them, effectively reducing some geometry into a collection of triangles. JuliaIO has the package [MeshIO.jl](https://github.com/JuliaIO/MeshIO.jl) for importing and exporting various mesh file formats into a standardized `GeometryBasics.Mesh` struct. Conventiently, this has a recipe for [Makie.jl](https://makie.juliaplots.org/stable/):
 
 ```julia
 using FileIO
@@ -31,7 +31,7 @@ mesh(teapot, color=:blue)
 
 ![teapot-simple](/assets/teapot.png)
 
-Internally these meshes are of type `Mesh{3, Float32, Triangle}`, effectively an array of `Triangle` primitives, which can be iterated over.  For some line segment defined by the points $(Q_1, Q_2)$, we can determine whether an intersection with the mesh occurs by checking if the segment intersects with any of the triangles. We can start sketching this out in code:
+Internally, these meshes are of type `Mesh{3, Float32, Triangle}`, effectively an array of `Triangle` primitives that can be iterated over.  For some line segment defined by the points $(Q_1, Q_2)$, we can determine whether an intersection with the mesh occurs by checking if the segment intersects with any of the triangles. We can start sketching this out in code:
 
 ```julia
 function does_intersect(mesh::Mesh{3, T}, segment) where {T}
@@ -44,17 +44,17 @@ function does_intersect(mesh::Mesh{3, T}, segment) where {T}
 end
 ```
 
-The intersection between a segment and a triangle is a well studied problem: a brief search on the internet and you might stumble over ["A robust segment/triangle intersection algorithm for interference tests. Efficiency study"](https://www.sciencedirect.com/science/article/pii/S0925772109001448) by Jiménez, Segura and Feito (2010), which details a few classic algorithms and introduces a novel approach, which I will attempt to detail.
+The intersection between a segment and a triangle is a well studied problem: a brief search on the internet and you might stumble over ["A robust segment/triangle intersection algorithm for interference tests"](https://www.sciencedirect.com/science/article/pii/S0925772109001448) by Jiménez, Segura and Feito (2010), which details a few classic algorithms and introduces a novel approach, which I will attempt to detail.
 
 ### Jiménez, Segura and Feito (2010)
 
-The authors derive their algorithm in [_barycentric_ coordinates](https://en.wikipedia.org/wiki/Barycentric_coordinate_system) -- effectively center of mass coordinates for $\mathbb{R}^N$ relative to $N+1$ points. For regular three dimensions, these coordinates describes the location of a point $P$ relative to the vertices of a tetrahedron formed by $ABCD$. The coordinates are parameterized by $\alpha, \beta, \gamma, \delta \in \mathbb{R},$ for which
+The authors derive their algorithm in [_barycentric_ coordinates](https://en.wikipedia.org/wiki/Barycentric_coordinate_system) -- effectively center of mass coordinates for $\mathbb{R}^N$ with respect to some $N+1$ points. For regular three dimensions, these coordinates are given relative to the vertices of a tetrahedron formed by $ABCD$. The coordinates are parameterized by $\alpha, \beta, \gamma, \delta \in \mathbb{R},$ thus a point $P$ is given by
 
 \begin{equation}
     (\alpha + \beta + \gamma + \delta) P =  \alpha A + \beta B + \gamma C + \delta D, 
 \end{equation}
 
-which has the special property that multiplication by some non-zero $\lambda$ leaves $P$ unchanged. Consequently, barycentric coordinates are degenerate, and two sets may be equivalent $(\alpha : \beta : \gamma : \delta) = \lambda (\alpha\prime : \beta\prime : \gamma\prime : \delta\prime)$. Uniqueness of the coordinates is imposed via
+with the special property that multiplication by some non-zero $\lambda$ leaves $P$ unchanged. Consequently, barycentric coordinates are degenerate, and two sets may be equivalent $(\alpha : \beta : \gamma : \delta) = \lambda (\alpha\prime : \beta\prime : \gamma\prime : \delta\prime)$. Uniqueness of the coordinates is imposed through the requirement
 
 \begin{equation}
     \alpha + \beta + \gamma + \delta = 1,
@@ -73,7 +73,7 @@ The signed, or orientated, volume of the tetrahedron formed by $ABCD$ is
         \end{vmatrix},
 \end{equation}
 
-where the rows of the matrix are elements, allowing the barycentric coordinates to be uniquely solved via
+where the rows of the matrix are elements of the subtraction. This formulation solves the barycentric coordinates uniquely via
 
 \begin{align}
     \alpha =\,& \frac{\lvert PBCD \rvert}{\lvert ABCD \rvert}, & \beta =\,& \frac{\lvert PADC \rvert}{\lvert ABCD \rvert} 
@@ -85,7 +85,7 @@ The primary benefit of this is that establishing the location of the point $P$ r
 - $\alpha > 0$ implies $P$ is on the *same side* of $BCD$ as $A$,
 - $\alpha < 0$ implies $P$ is on the *opposite side* of $BCD$ from $A$.
 
-The same property is true for $\beta$ and $ADC$, $\gamma$ and $ABD$, and $\delta$ and $ACB$. This property allows us to claim the theorem:
+The same property is true for $\beta$ and $ADC$, $\gamma$ and $ABD$, and $\delta$ and $ACB$. With this, we may claim:
 
 @@theorem
 **Theorem 1:**
@@ -99,7 +99,7 @@ Let $V_1 V_2 V_3$ be a triangle, and $Q_1 Q_2$ a segment such that $Q_1$ is _not
 where $(\alpha : \beta : \gamma : \delta )$ are the barycentric coordinates of $Q_2$ with respect to the tetrahedron $Q_1 V_1 V_2 V_3$.
 @@
 
-The mental sketch of this proof follows by considering the regions the inequalities restrict us to; $\sign \alpha \leq 0$ states $Q_2$ must be on the opposite side of the triangle formed by $V_1 V_2 V_3$ from $Q_1$, and the other inequalities state that the point is within the tetrahedron formed by $Q_1\prime V_1 V_2 V_3$ where $Q_1\prime$ is the point obtained under the projection $\alpha \rightarrow -\alpha$.
+The mental sketch of this proof follows by considering the region restrictions imposed by the inequalities; $\sign \alpha \leq 0$ states $Q_2$ must be on the opposite side of the triangle formed by $V_1 V_2 V_3$ from $Q_1$, and the other inequalities state that the point is within the tetrahedron formed by $Q_1\prime V_1 V_2 V_3$ where $Q_1\prime$ is the point obtained under the projection $\alpha \rightarrow -\alpha$.
 
 The authors provide a full proof, and also an algorithm which I have taken the liberty of implementing in Julia:
 ```julia
@@ -144,11 +144,13 @@ end
 
 This algorithm has [back-face culling](https://en.wikipedia.org/wiki/Back-face_culling). 
 
-As a side note, algorithms in Julia are beautiful. Also note that the types of the triangle vertices and point vertices have been left generic under the restriction that they must be similar -- this technically isn't required, but I've left in because it has helped me catch some strange type conversion elsewhere in my code.
+As a side note, algorithms in Julia are _absolutely beautiful_. 
+
+Also note that the types of the triangle vertices and point vertices have been left generic under the restriction that they must be similar -- this technically isn't required, but I've left in because it has helped me catch some strange type conversion elsewhere in my code.
 
 ### Implementing mesh intersections
 
-With the above algorithm, we can now write some trivial wrapper code, and begin calculating segment with mesh intersections. For simplicity, I'm going to treat any tuple of vectors as a segment, instead of using a geometry primitive:
+With the above algorithm, we can now write some trivial wrapper code, and begin calculating segment with mesh intersections. For simplicity, I'm going to treat any array of tuple of vectors as a segment, instead of using a geometry primitive:
 
 ```julia
 function has_intersect(mesh, seg)
@@ -193,7 +195,7 @@ Here the green lines intersect with the teapot, whereas the red lines do not.
 
 ## Benchmarking
 
-We'll benchmark many given collection of segments with BenchmarkTools.jl to see how performant the intersection algorithm is:
+We'll benchmark a given collection of segments with BenchmarkTools.jl to see how performant the intersection algorithm is:
 ```julia
 seed!(2022)
 segments = [randsegment(3.0) for _ in 1:10_000]
@@ -209,7 +211,7 @@ using BenchmarkTools
 # 757.721 ms (0 allocations: 0 bytes)
 ```
 
-This is already pretty good. The exact same performance is obtained if the segments are `Tuple{SVector{3, Float64},SVector{3, Float64}}`, using the `SVector` type from StaticArrays.jl. We can also convert the mesh structure to use StaticArrays for the triangles:
+This is already pretty good. The exact same performance is obtained if the segments are `Tuple{SVector{3, Float64},SVector{3, Float64}}`, using the `SVector` type from [StaticArrays.jl](https://github.com/JuliaArrays/StaticArrays.jl). We can also convert the mesh structure to use `SVector` for the triangles:
 
 ```julia
 static_teapot = map(teapot) do triangle
@@ -220,13 +222,13 @@ end
 # 578.608 ms (0 allocations: 0 bytes)
 ```
 
-for a slight performance boost, which will make a significant difference when plugging this into the geodesic ray tracer.
+This yields a slight performance boost, which will make a significant difference when plugging this into the geodesic ray tracer.
 
 ## Meshes in curved geometries
 
-The software I have been working on for tracing geodesics around arbitrary spacetimes has recently undergone a large refactor, which makes strapping something like mesh-intersections quite straight forward. In fact, I implemented meshes as a feature in [AccretionGeometry.jl](https://github.com/astro-group-bristol/AccretionGeometry.jl) before even writing this blog post.
+The software I have been working on for tracing geodesics around arbitrary spacetimes has recently undergone a large refactor, which makes strapping something like mesh-intersections quite straight forward. In fact, I implemented meshes as a feature in [AccretionGeometry.jl](https://github.com/astro-group-bristol/AccretionGeometry.jl) before even writing this post.
 
-Meshes are implemented by pre-calculating a bounding box, and converting the mesh structure into StaticArrays:
+I implemented meshes by pre-calculating a bounding box, and converting the mesh structure into StaticArrays, just as above:
 ```julia
 # snippet from AccretionGeometry/src/meshes.jl
 struct MeshAccretionGeometry{T} <: AbstractAccretionGeometry{T}
@@ -258,7 +260,7 @@ end
 # ...
 ```
 
-which is invoked in 
+invoked in 
 
 ```julia
 # snippet from AccretionGeometry/src/intersections.jl
@@ -272,13 +274,14 @@ end
 
 The `has_intersect` function is then implemented just as above, with one other small optimization pass:
 
-- since the integrator is calculating small steps at a time, we can assume $\lVert Q_1Q_2 \rVert < \varepsilon$, where $\varepsilon$ is some sufficiently small distance,
+- since the integrator is calculating small steps at a time, we can assume $\lVert Q_1Q_2 \rVert < \varepsilon$, where $\varepsilon$ is some _sufficiently_ small distance,
 - since the geodesics are being integrated from a known source, we know $Q_2$ will always be ahead of $Q_1$, and,
-- the mesh triangles are generally small (arguable).
+- the mesh triangles are generally small, comparable to $\varepsilon$ (arguable).
 
-The second assumption means we could theoretically eliminate the $w=0$ branch of the JSR algorithm, as the orientation of the segment never needs swapping, but when benchmarked, that resulted in negligible performance gain. Instead, we can combine all three assumptions and implement a new condition:
+The second assumption means we could theoretically eliminate the $w=0$ branch of the JSR algorithm, as the orientation of the segment never needs swapping, but when benchmarked, that resulted in negligible performance gain but may introduce bugs later down the line. Instead, we can combine all three assumptions and implement a new condition:
 
 ```julia
+# snippet from AccretionGeometry/src/meshes.jl
 function has_intersect(m::MeshAccretionGeometry{T}, line_element) where {T}
     for triangle in m.mesh
         dist_sq = sum((triangle[1] .- line_element[2]) .^ 2)
@@ -288,17 +291,18 @@ function has_intersect(m::MeshAccretionGeometry{T}, line_element) where {T}
     end
     false
 end
+# ...
 ```
 
-This basically checks if the first vertex of the triangle is within a certain distance of $Q_2$, and skips running JSR if it is not. This way, we consider only mesh triangles in the local neighbourhood of $Q_2$. This condition is quite tentative, and the magic value $3.0$ would require tweaking, or at least scaling with the third assumptions. In practice, however, this benchmarks at $2\times$ speed, with an error lower than the integrator tolerance.
+This basically checks if the first vertex of the triangle is within a certain distance of $Q_2$, and skips running JSR if it is not. This way, we consider only mesh triangles in the local neighbourhood of $Q_2$. This condition is quite tentative, and the magic value $3.0$ is _very magic_, and would need scaling with the third assumptions. In practice, however, this benchmarks at $2\times$ speed, with an error lower than the integrator tolerance.
 
 ### Russel's teapot
 
-If you haven't heard of [Russel's teapot](https://en.wikipedia.org/wiki/Russell%27s_teapot), it is the philosophical notion that if something cannot be disproven, does not mean it is true. Bertrand Russel illustrates this with a teapot floating somewhere in space, and said you cannot be expected to believe that this teapot _really exists_ only because _you cannot disprove_ it.
+If you haven't heard of [Russel's teapot](https://en.wikipedia.org/wiki/Russell%27s_teapot), it is the philosophical notion that if something cannot be disproven, then that does not mean it is true. Bertrand Russel illustrates this by imagining a teapot floating somewhere in space, and says you cannot be expected to believe that this teapot _really exists_ solely because _you cannot disprove_ it.
 
 The antithesis of this is stating just because something cannot be disproved, doesn't mean it's not true.
 
-Either way, _we can now_ visualize what would happen if Russel's teapot were close to a maximally spinning Kerr black hole. The teapot model needs to be moved next to the black hole, which can be accomplished with CoordinateTransformations.jl and Rotations.jl:
+Either way, _we can now_ visualize what would happen if Russel's teapot were close to a maximally spinning Kerr black hole. The teapot model needs to be moved next to the black hole, which can be accomplished with [CoordinateTransformations.jl](https://github.com/JuliaGeometry/CoordinateTransformations.jl) and [Rotations.jl](https://github.com/JuliaGeometry/Rotations.jl):
 
 ```julia
 using CoordinateTransformations, Rotations
@@ -315,7 +319,7 @@ bbox = AccretionGeometry.bounding_box(xfmed_teapot)
 russels_teapot = MeshAccretionGeometry(xfmed_teapot, bbox...)
 ```
 
-More constructors for `MeshAccretionGeometry` will be implemented, and also tied together with the transformation libraries to make this process easier. Also the transformation and rotation values are arbitrary, just to move the teapot outside of the event horizon.
+More constructors for `MeshAccretionGeometry` will be implemented, and also tied together with the transformation libraries to make this process easier. In the above, the transformation and rotation values are arbitrary, and just move the teapot outside of the event horizon somewhere.
 
 Rendering the teapot is then very straight forward:
 
@@ -341,13 +345,13 @@ heatmap(img)
 
 This takes about 8 seconds to render using CPU threads (default).
 
-I used Plots.jl for the heatmap instead of Makie, since it was a little more convenient at the time -- as a note, I am personally trying to transition to Makie but find Plots to be faster in general.
+I used Plots.jl for the heatmap instead of Makie, since it was a little more convenient at the time.
 
-The current default ValueFunction colours pixels by the affine parameter value (proper time) where the geodesic terminated, which can give a mild impression of three dimensionality.
+The current default `ValueFunction` colours pixels by the affine parameter value (proper time) where the geodesic terminated, which can give a mild impression of three dimensionality by restricting the colour map.
 
 ### Falling teapot
 
-We can write a little script and animate a teapot falling towards a Kerr black hole. To do this, we move the teapot and render again:
+Here is a little script that animates a teapot falling towards a Kerr black hole. To do this, the teapot is moved rendered again:
 
 ```julia
 n = 30          # number of frames
@@ -373,7 +377,7 @@ for (i, x) in enumerate(0:0:9.5/n:9.5)
 end
 ```
 
-I then wrote a little bit of conversion code to transform this into a `UInt8` images; the values are arbitrary, but gave a decent contrast:
+I wrote a small conversion to transform the `images` vector into `UInt8` images; the values are arbitrary, but give a decent contrast:
 ```julia
 truncator(px) = clamp(px, UInt8)
 
@@ -397,7 +401,7 @@ save("teapot.gif", anim_frames, fps=12)
 
 ## More meshes
 
-Any meshes file compatible with MeshIO.jl _should_ now work with this tracer, as long as it can be decomposed into a series of triangles. To illustrate this, here is a cow small cow:
+Any meshes file compatible with MeshIO.jl _should_ now work with this tracer, as long as it can be decomposed into a series of triangles. To illustrate this, here is a small cow:
 
 ~~~
 <div style="text-align: center;">
@@ -409,4 +413,4 @@ And increasing the image resolutions a litte, this cow also goes (over) around t
 
 ![](/assets/cow-render.gif)
 
-Particularly cool is the inverted false-image on the left side of the black hole. The cow here is co-rotating with the black hole.
+Particularly neat are the inverted false-images on the left side of the black hole.
