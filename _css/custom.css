@@ -4,9 +4,55 @@ nav li a {
     border-bottom: 2px solid #FFFFFF;
 }
 
+.theorem {
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+    margin-bottom: 10px;
+    border-radius: 10px;
+    outline: 1px solid rgb(30, 103, 151);
+}
+
+.theorem p {
+    margin-top: 0px;
+    margin-bottom: 0px;
+}
+
+.summary-container {
+    margin-bottom: 40px;
+}
+
+.summary-column h2 {
+    margin-top: 10px;
+}
+
 .summary-image {
-    max-height: 300px;
-    float: left;
+    border-radius: 10px;
+    padding-left: 0px !important;
+    height: 100%;
+}
+
+.summary-column {
+    flex: 50%;
+}
+
+.summary-row {
+    display: flex;
+    align-items:flex-start;
+}
+
+@media screen and (max-width: 600px) {
+    .column {
+        width: 100%;
+    }
+}
+
+/* Clear floats after the columns */
+.summary-row:after {
+    content: "";
+    display: table;
+    clear: both;
 }
 
 /* SEARCH BAR */ 
