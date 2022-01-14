@@ -17,3 +17,4 @@ global latex commands
 \newcommand{\d}{\text{d}}
 \newcommand{\deriv}[2]{\frac{\d#1}{\d#2}}
 \newcommand{\pderiv}[2]{\frac{\partial#1}{\partial#2}}
+\newcommand{\sign}{\text{sign}\,}

@@ -1,10 +1,10 @@
-@def title = "Geodesic solutions from a metric with Julia"
+@def title = "Geodesic solutions from a symbolic metric with Julia"
 @def description = "A recent interest of mine has been integrating geodesic equations using DifferentialEquations.jl, for which I've been developing a small package. One of the aims of the project is to provide a symbolic backend for generating the needed Julia functions, and automatically integrating to trace geodesic paths in arbitrary metrics."
 @def image = "/assets/geodesic-example-2.svg"
 @def date = "5/11/2021"
 @def tags = ["2021", "geodesics", "julia", "relativity"]
 
-# Geodesic solutions from a metric with Julia
+# Geodesic solutions from a symbolic metric with Julia
 
 The Julia programming language has a very rich and complete differential equation solving library, courtesy of [SciML](http://sciml.ai), implementing a very diverse [number of solvers](https://diffeq.sciml.ai/stable/solvers/ode_solve/), ideal for many different mathematical applications.
 

@@ -20,15 +20,20 @@ function _build_summary(page)
     )
     tags = join(("""<a href="tag/$i">$i</a>""" for i in pagevar(page, :tags)), " - ")
 
-    """<div class="row"><div class="container">
-    <img class="summary-image" src="$image">
-    <a href="$page"><h2>$title</h2></a>
-    <p>$description</p>
-    <p style="font-size:14px;">
-    $date - $tags
-    </p>
-    <div style="clear: both"></div>
-    </div>
+    """
+    <div class="summary-container">
+        <div class="summary-row">
+          <div class="summary-column" style="text-align: center;">
+            <img class="summary-image" src="$image">
+          </div>
+          <div class="summary-column">
+            <a href="$page"><h2>$title</h2></a>
+            <p>$description</p>
+            <p style="font-size:14px;">
+            $date - $tags
+            </p>
+          </div>
+        </div>
     </div>
     """
 end
@@ -37,13 +42,17 @@ function hfun_post_summaries()
     pages = [
         joinpath("pages", i)[1:end-3] for i in filter(f -> endswith(f, ".md"), readdir("pages"))
     ]
-    perm = sortperm([pagevar(p, :date) for p in pages])
+    date_strings::Vector{String} = filter(i -> i isa String, [pagevar(p, :date) for p in pages])
+    dates = map(i->Date(i, dateformat"d/m/y"), date_strings)
+    @show pages
+    @show dates
+    perm = reverse(sortperm(dates))
     io = IOBuffer()
-    write(io, _build_summary(pages[1]))
+    write(io, _build_summary(pages[perm[1]]))
     if length(perm) > 1
         for i in perm[2:end]
             summary = _build_summary(pages[i])
-            write(io, "<hr/>\n" * summary)
+            write(io, summary)
         end
     end
     String(take!(io))
