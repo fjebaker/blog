@@ -101,7 +101,7 @@ where $(\alpha : \beta : \gamma : \delta )$ are the barycentric coordinates of $
 
 The mental sketch of this proof follows by considering the regions the inequalities restrict us to; $\sign \alpha \leq 0$ states $Q_2$ must be on the opposite side of the triangle formed by $V_1 V_2 V_3$ from $Q_1$, and the other inequalities state that the point is within the tetrahedron formed by $Q_1\prime V_1 V_2 V_3$ where $Q_1\prime$ is the point obtained under the projection $\alpha \rightarrow -\alpha$.
 
-The author's provide a full proof, and also an algorithm which I have taken the liberty of implementing in Julia:
+The authors provide a full proof, and also an algorithm which I have taken the liberty of implementing in Julia:
 ```julia
 # Jiménez, Segura, Feito. Computation Geometry 43 (2010) 474-492
 function jsr_algorithm(V₁::T, V₂::T, V₃::T, Q₁::V, Q₂::V; ϵ = 1e-6) where {T,V}
@@ -347,7 +347,7 @@ The current default ValueFunction colours pixels by the affine parameter value (
 
 ### Falling teapot
 
-We can write a little script and animate a higher resolution teapot falling into the Kerr black hole. To do this, we move the teapot and render again:
+We can write a little script and animate a teapot falling towards a Kerr black hole. To do this, we move the teapot and render again:
 
 ```julia
 n = 30          # number of frames
