@@ -8,7 +8,7 @@
 
 The Julia programming language has a very rich and complete differential equation solving library, courtesy of [SciML](http://sciml.ai), implementing a very diverse [number of solvers](https://diffeq.sciml.ai/stable/solvers/ode_solve/), ideal for many different mathematical applications.
 
-A problem in differential geometry that requires integrating a differential equation is the geodesic equation, which describes the shortest path between two points on arbitrarily curved spaces. For some point $x$ on a manifold $\mathcal{M}$, this equation is
+The geodesic equation is an equation in the field of differential geometry that requires integrating, and describes the shortest path between two points on arbitrarily curved spaces. For some point $x$ on a manifold $\mathcal{M}$, the geodesic equation is
 
 \begin{equation}
 \label{eq-geodesic}
@@ -18,17 +18,17 @@ A problem in differential geometry that requires integrating a differential equa
 
 where $\tensor{\Gamma}{i}{jk}$ are the Christoffel symbols, and $\lambda$ is an affine parameter.
 
-Calculating the components of this equation is, in general, an academic labour of love, which, in the absence of love, is a task delegated to *computer algebra systems* (CAS), such as SageMath.
+Calculating the components of this equation is, in general, an academic labour of love, which can be delegated to *computer algebra systems* (CAS), such as SageMath.
 
-Julia has a maturing computer algebra system of its own, in the form of [Symbolics.jl](https://github.com/JuliaSymbolics/Symbolics.jl), originally developed for uses in simplifying dynamical system modelling in SciML. By building on the abstract type hierarchy of Julia, Symbolics.jl is more feature rich than the documentation might initially suggest -- allowing use of e.g. the linear algebra package on symbolic expression, instead of having to redefine common routines -- allowing the developers to focus on converting symbolic expressions into useable, parallelizable Julia functions. For an example of how powerful this can be, see [call stack tracing for auto-parallelization](https://symbolics.juliasymbolics.org/dev/tutorials/auto_parallel/).
+Julia has a maturing computer algebra system of its own, in the form of [Symbolics.jl](https://github.com/JuliaSymbolics/Symbolics.jl), originally developed for uses in simplifying dynamical system modelling in SciML. By building on the abstract type hierarchy of Julia, Symbolics.jl is more feature rich than the documentation might initially suggest -- allowing use of e.g. the linear algebra package with symbolic expression. The developers have instead focused on converting symbolic expressions into useable, parallelizable Julia functions. For an example of how powerful this can be, see [call stack tracing for auto-parallelization](https://symbolics.juliasymbolics.org/dev/tutorials/auto_parallel/).
 
-With the intention of integrating eq. \eqref{eq-geodesic} for arbitrary manifolds given only an input metric, we hope to explore whether Julia's emergent features are capable enough to already support symbolic tensor algebra, and plot null-geodesics for the Eddington-Finkelstein coordinates.
+With the intention of integrating eq. \eqref{eq-geodesic} for an arbitrary manifold given only the symbolic metric, we hope to explore whether Julia's emergent features are capable enough to already support symbolic tensor algebra, by integrating and visualizing null-geodesics in the Eddington-Finkelstein coordinates.
 
 ## Symbolic tensors and contractions
 
-A place to start is writing tensor equations in Julia; the difficulty here is the way in which index contractions are expressed. Fortunately, Julia has numerous Einsum implementations, such as [Tullio.jl](https://github.com/mcabbott/Tullio.jl), which allows for very expressive code.
+As good of a place to start as any is with writing tensor equations in Julia; the difficulty here is the way in which index contractions are expressed. Fortunately, Julia has numerous Einsum implementations, such as [Tullio.jl](https://github.com/mcabbott/Tullio.jl), which allows for very expressive code.
 
-For example, consider a vector dot product
+For example, consider the vector dot product
 
 \begin{equation}
 \label{eq-u-dot-u}
@@ -37,7 +37,7 @@ For example, consider a vector dot product
 
 where $\tensor{g}{}{ij}$ is the metric.
 
-We can express a symbolic vector and metric generically, and Tullio provides the contraction abstraction for us:
+We can express a symbolic vector and metric (matrix), and Tullio provides the contraction abstraction for us:
 
 ```julia
 using Symbolics, Tullio
@@ -112,9 +112,9 @@ Expressing eq. \eqref{eq-geodesic} with Tullio is also extremely simple:
 @tullio δ²xδλ²[i] := -Γ[i, j, k] * v[j] * v[k]
 ```
 
-allowing us to fully assemble the geodesic equations symbolically, in pure Julia, in just a handful of lines of code!
+We've now assembled the full geodesic equation symbolically, in pure Julia, in just a handful of lines of code!
 
-As a function, obtaining geodesic equations from a metric then is:
+To wrap this all into a function:
 ```julia
 function geodesic_eqs(g, v, δ)
     ginv = inv(g)
@@ -134,11 +134,11 @@ where we broadcast `simplify` in the last line of the function in an attempt (an
 
 Symbolics.jl is still a maturing library, and cannot simplify or expand equations as effectively as veteran toolkits like SageMath. Likewise, the `solve_for` function in Symbolics.jl is currently limited to only linear equations, which quickly becomes problematic in non-linear coordinates. 
 
-In the above case of the Eddington-Finkelstein metric, the expressions produced with Julia are considerably more complex that those produced with SageMath, although Julia is orders of magnitude faster. These differences are even more drastic, both in complexity and speed, when examining more involved metrics, such as Kerr-Newman in Boyer-Lindquist coordinates. If obtaining simplified equations is the desire, it is unsurprising SageMath is the better tool, but it is impressive how much Julia is already able to accomplish in this domain.
+In the above case of the Eddington-Finkelstein metric, the expressions produced with Julia are considerably more complex that those produced with SageMath. These differences are even more drastic when examining more involved metrics, such as Kerr-Newman in Boyer-Lindquist coordinates. If obtaining simplified equations is the desire, it is unsurprising SageMath is the better tool, but it is impressive how much Julia is already able to accomplish in this domain. Furthermore, as one might expect, Julia remains orders of magnitude faster!
 
 ## Integrating the geodesic equation
 
-Using `build_function`, we can use the `geodesic_eqs` function to construct a Julia function that we can wrap and pass to DifferentialEquations.jl to solve. An implementation of this may look like:
+Using Symbolics.jl's `build_function`, we can use `geodesic_eqs` to construct a Julia function that we can wrap and pass an integration problem to DifferentialEquations.jl. An implementation of this may look like:
 
 ```julia
 function build_ode(g, coords, v, args)
@@ -199,7 +199,7 @@ plot!(sol, vars=(4, 2))
 
 We must now attempt to restrict the type of geodesic we are calculating.
 
-Recall that three domains exist depending on the value of eq. \eqref{eq-u-dot-u}, with null geodesics having $u \cdot u = 0$. The initial velocity vector must be constrained through the time component to satisfy this condition in order for the solution to be light-like (i.e. a photon path). A simple way of achieving this is to calculate
+Recall that three domains exist depending on the value of eq. \eqref{eq-u-dot-u}, with null geodesics having $u \cdot u = 0$. The initial velocity vector must be constrained by the $v_t$ component to satisfy this condition in order for the solution to be light-like (i.e. a photon path). A simple way of achieving this is to calculate
 
 \begin{equation}
 
@@ -207,7 +207,7 @@ Recall that three domains exist depending on the value of eq. \eqref{eq-u-dot-u}
 
 \end{equation}
 
-for an initial velocity vector $v$ using the numerical value of the metric at the initial position $u$, to find the initial value of $v_t$ which keeps the geodesic light-like.
+for an initial velocity vector $v$, using the numerical value of the metric at the initial position $u$, to find an initial value of $v_t$ which keeps the geodesic light-like.
 
 The expression to solve is straight forward to generate. In the case where we only change the initial velocity angles $\theta$, $\phi$, we can simplify the problem a little
 
@@ -222,7 +222,7 @@ vel_vec = [vt0, -1.0, vθ, vϕ]
 solving
 
 ```julia
-out ~ 0
+out ~ 0
 ```
 
 The equation we assemble and store in `out` is
@@ -234,7 +234,7 @@ The equation we assemble and store in `out` is
 
 which we would want to solve for $v_t$.
 
-We now encounter the current limitations of Symbolics.jl, namely the lack on non-linear symbolic solvers leaving us no simple way to rearrange the symbolic expression for $v_t$. Here, however, other libraries come to our aid, such as [NLsolve.jl](https://github.com/JuliaNLSolvers/NLsolve.jl), for approximating numerical solutions. In practice, this involves building a function from our symbolic expression, and exposing only $v_t$ as an argument for which to find the roots of eq. \eqref{eq-vt-out}. 
+We now encounter the current limitations of Symbolics.jl, namely the lack on non-linear symbolic solvers leaving us no simple way to rearrange the symbolic expression for $v_t$. Here, however, [NLsolve.jl](https://github.com/JuliaNLSolvers/NLsolve.jl) will be able to approximate a numerical solution. This involves building a function from our symbolic expression, and exposing only $v_t$ as an argument for which to find the roots of eq. \eqref{eq-vt-out}. 
 
 We build the function with
 
@@ -263,7 +263,7 @@ and could choose to compute the Jacobian symbolically for a better (and faster) 
 nsol = nlsolve(optimf!, [1.0])
 ```
 
-Note that eq. \eqref{eq-vt-out} has two solutions for $v_t$, representing the forward and backward direction of time. In our case, we are examining a stationary metric, and thus the solutions are equivalent -- but we can push the solver to find one solution or another by tweaking the initial value.
+Note that eq. \eqref{eq-vt-out} has two solutions for $v_t$, representing the forward and backward direction of time. In our case, we are examining a stationary metric, and thus the solutions are equivalent -- but we can push the solver to find one solution over another by tweaking the initial value, as above, to start in the positive domain.
 
 With $v_t$ constrained, we reassemble `u0` and integrate again:
 
@@ -282,9 +282,9 @@ Plotting the solution of the null geodesic in this metric:
 
 ![geodesic-example-2](/assets/geodesic-example-2.svg)
 
-Although this numerically driven approach works, the equations that Symbolics.jl simplifies are still complex, and will posit a performance overhead that can become problematic. Furthermore, the use of numerical algorithms where analytic solutions are known, as in the case of constraining the velocity for a null geodesic, will scale poorly for many geodesics. Although calls to SymPy may be made to aid in the symbolic processes -- alleviating the cost of repeated numerical processes -- the novelty of the pure Julia implementation is lost; instead, I believe patience and the steady development of Symbolics.jl will eventually permit such a feat.
+Although this numerically driven approach works, the equations Symbolics.jl simplifies are still complex, and will posit a performance overhead that can become problematic. Furthermore, the use of numerical algorithms where analytic solutions are known, as in the case of constraining the velocity for a null geodesic, will scale poorly for many geodesics. Calls to SymPy may be made to aid in the symbolic processes to alleviate this, but then the novelty of the pure Julia implementation is lost; instead, I believe patience and the steady development of Symbolics.jl will eventually permit such a feat.
 
-When impatient, and with a desire to avoid re-inventing the wheel, we may explore a SageMath-Julia hybrid method which leverages the best of both languages, to generate fast and simpler symbolic expressions.
+Until then, we may explore a SageMath-Julia hybrid method which leverages the best of both languages, to generate fast and simpler symbolic expressions.
 
 ## A SageMath-Julia workflow
 
@@ -346,7 +346,7 @@ c.f. eq. \eqref{eq-vt-out} with $v_r = -1$, which we can ask SageMath to solve s
 vt_sols = (constraint_equation.expr() == 0).solve(vt)
 ```
 
-and obtain:
+to obtain:
 
 \begin{equation}
 v_{t} 
@@ -355,7 +355,7 @@ v_{t}
 
 which is much more convenient to work with.
 
-It is now trivial to export this equation, and the geodesic components, as plain string expressions and paste them as Julia code in the REPL. For more complex metrics, the generated expressions are repulsively long, and require some caching to be performant, which Julia is not able to automatically do (e.g., evaluate $\sin(\theta)$ once per call, and use the same value in all components). Luckily, with modern text editors, this is very fast to do.
+It is now trivial to export this equation, along with the geodesic components, as plain string expressions and paste them as Julia code in the REPL. For more complex metrics, the generated expressions are repulsively long, and require some caching to be performant, which Julia is not able to automatically do (e.g., evaluate $\sin(\theta)$ once per call, and reuse the same value throughout the function body). Luckily, with modern text editors, a string-search-replace is a rapid way to mimic this.
 
 ## Remarks
 
