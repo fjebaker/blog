@@ -7,7 +7,7 @@
 # Ray-tracing meshes in curved geometries
 
 
-I've recently refactored [some software](https://github.com/astro-group-bristol/GeodesicTracer.jl) I'm hoping to use to calculate reverberation lags around accreting black holes and X-ray binaries, which split up a monolithic project into more manageable packages. In specific, [AccretionGeometry.jl](https://github.com/astro-group-bristol/AccretionGeometry.jl) now handles all of the intersection calculations between geodesics and discs, but, also, _much more_. An intention has always been to later incorporate MHD simulations of accretion discs into the ray-tracer, to more accurately model light curves coming from accreting objects, which are commonly exported as some kind of mesh -- and so provides an excuse to learn how to use mesh files in Julia.
+I've recently refactored [some software](https://github.com/astro-group-bristol/GeodesicTracer.jl) I'm hoping to use to calculate reverberation lags around accreting black holes and X-ray binaries, which split up a monolithic project into more manageable packages. In specific, [AccretionGeometry.jl](https://github.com/astro-group-bristol/AccretionGeometry.jl) now handles all of the intersection calculations between geodesics and discs, but, also, _much more_. An intention has always been to later incorporate MHD simulations of accretion discs into the ray-tracer, to more accurately model light curves coming from accreting objects, which are commonly exported as some kind of mesh or grid. In the prior case, intersections between the mesh and traced geodesics need to be determined.
 
 ~~~
 <h2>Overview</h2>
@@ -16,7 +16,7 @@ I've recently refactored [some software](https://github.com/astro-group-bristol/
 
 ## Meshes and intersections
 
-JuliaGeometry have [Meshes.jl](https://github.com/JuliaGeometry/Meshes.jl) for computational geometry and meshing algorithms, which supplies a `has_intersect` function, returning `true` or `false` if one geometric object intersects with another. In practice, I was unable to get this to work with the `Segment` and `Mesh` type, so, instead, opted to try and implement my own algorithm. 
+JuliaGeometry have [Meshes.jl](https://github.com/JuliaGeometry/Meshes.jl) for computational geometry and meshing algorithms, which exports a `has_intersect` function, returning `true` or `false` if one geometric object intersects with another. In practice, I was unable to get this to work with the `Segment` and `Mesh` type, so, instead, opted to try and implement my own algorithm. 
 
 Mesh files (such as `.obj` files) define a series of vertices and the faces that connect them, effectively reducing some geometry into a collection of triangles. JuliaIO has the package [MeshIO.jl](https://github.com/JuliaIO/MeshIO.jl) for importing and exporting various mesh file formats into a standardized `GeometryBasics.Mesh` struct. Conventiently, this has a recipe for [Makie.jl](https://makie.juliaplots.org/stable/):
 
@@ -99,7 +99,7 @@ Let $V_1 V_2 V_3$ be a triangle, and $Q_1 Q_2$ a segment such that $Q_1$ is _not
 where $(\alpha : \beta : \gamma : \delta )$ are the barycentric coordinates of $Q_2$ with respect to the tetrahedron $Q_1 V_1 V_2 V_3$.
 @@
 
-The mental sketch of this proof follows by considering the region restrictions imposed by the inequalities; $\sign \alpha \leq 0$ states $Q_2$ must be on the opposite side of the triangle formed by $V_1 V_2 V_3$ from $Q_1$, and the other inequalities state that the point is within the tetrahedron formed by $Q_1\prime V_1 V_2 V_3$ where $Q_1\prime$ is the point obtained under the projection $\alpha \rightarrow -\alpha$.
+The sketch of this proof follows by considering the region restrictions imposed by the inequalities; $\sign \alpha \leq 0$ states $Q_2$ must be on the opposite side of the triangle formed by $V_1 V_2 V_3$ from $Q_1$, and the other inequalities restrict $Q_2$ within the tetrahedron if the sides were projected to infinity.
 
 The authors provide a full proof, and also an algorithm which I have taken the liberty of implementing in Julia:
 ```julia
@@ -146,7 +146,7 @@ This algorithm has [back-face culling](https://en.wikipedia.org/wiki/Back-face_c
 
 As a side note, algorithms in Julia are _absolutely beautiful_. 
 
-Also note that the types of the triangle vertices and point vertices have been left generic under the restriction that they must be similar -- this technically isn't required, but I've left in because it has helped me catch some strange type conversion elsewhere in my code.
+Note that the types of the triangle vertices and point vertices have been left generic under the restriction that they must be similar -- this technically isn't required, but I've left in because it has helped me catch some strange type conversion elsewhere in my code.
 
 ### Implementing mesh intersections
 
@@ -187,7 +187,7 @@ randsegment(range) = Tuple(Tuple(rand(-range:0.1:range) for _ in 1:3) for _ in 1
 plot_segments(teapot, [rand_segment(3.0) for _ in 1:10])
 ```
 
-Unfortunately Makie by default will draw lines behind meshes, so the figure looks a little strange, but the intersection algorithm is definitely working.
+Unfortunately Makie by default will draw lines behind meshes, so the figure isn't as illustrative as initially hoped, but it is somewhat convincing that the intersection algorithm is working.
 
 ![teapot-simple](/assets/line-teapot-intersect.png)
 
@@ -228,7 +228,7 @@ This yields a slight performance boost, which will make a significant difference
 
 The software I have been working on for tracing geodesics around arbitrary spacetimes has recently undergone a large refactor, which makes strapping something like mesh-intersections quite straight forward. In fact, I implemented meshes as a feature in [AccretionGeometry.jl](https://github.com/astro-group-bristol/AccretionGeometry.jl) before even writing this post.
 
-I implemented meshes by pre-calculating a bounding box, and converting the mesh structure into StaticArrays, just as above:
+These was done by pre-calculating a bounding box around the meshes, and converting the mesh structure into StaticArrays, just as above:
 ```julia
 # snippet from AccretionGeometry/src/meshes.jl
 struct MeshAccretionGeometry{T} <: AbstractAccretionGeometry{T}
@@ -409,7 +409,7 @@ Any meshes file compatible with MeshIO.jl _should_ now work with this tracer, as
 </div>
 ~~~
 
-And increasing the image resolutions a litte, this cow also goes (over) around the (moon) black hole:
+And increasing the image resolutions a litte, this cow also goes around (over) the black hole (moon):
 
 ![](/assets/cow-render.gif)
 
