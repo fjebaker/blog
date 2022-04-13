@@ -309,7 +309,7 @@ The _innermost stable circular orbit_, as the name suggests, are the set of orbi
     \frac{\partial^2}{\partial r^2} \mathcal{R} \geq 0,
 \end{equation}
 
-which solves for an inequality $r > r_\text{ISCO}$, which is in the Bardeen paper. Physically, these are the orbits where perturbations to the potential will not cause the orbit to diverge; it is the energetically _preferred state_, if you will. 
+which solves for an inequality $r \geq r_\text{ISCO}$, which is in the Bardeen paper. Physically, these are the orbits where perturbations to the potential will not cause the orbit to diverge; it is the energetically _preferred state_, if you will. 
 
 ### Marginally bound orbits
 
@@ -341,7 +341,7 @@ r_\text{ph} = 2M \left[
 \right].
 \end{equation}
 
-The photon orbit represents, if you will, the innermost possible (unstable) circular orbit, which requires velocity equal to the speed of light. Orbits between with $r_\text{ph} < r < r_\text{ISCO}$ can only form unstable circular orbits, which may quickly and catastrophically collapse.
+The photon orbit represents, if you will, the innermost possible (unstable) circular orbit, which requires velocity equal to the speed of light. Orbits between with $r_\text{ph} \leq r < r_\text{ISCO}$ can only form unstable circular orbits, which may quickly and catastrophically collapse.
 
 Analogous to the marginally bound orbits, the unstable orbits at the photon orbit, if perturbed outwards, will arrive at infinity still traveling at the speed of light.
 
@@ -390,7 +390,7 @@ function phi_vel(m, u)
 end
 ```
 
-This code snippet defines utility functions for calculating the initial radial velocity component for a given metric and position. The actual tracing code is then a single function call:
+This code snippet defines utility functions for calculating the initial radial velocity component for a given metric and position. The actual tracing code is a single function call:
 
 ```julia
 using StaticArrays
@@ -467,7 +467,7 @@ Up until this point we have been able to use SageMath to derive results for $E$ 
 
 Generalizing the last section; can we reliably and quickly find circular orbits without any _a priori_ knowledge of the velocity vectors, other than that we are searching in the equatorial plane?
 
-The temptation here is to brute-force search over the $\dot{u}^\phi$ parameter space until some stability condition is met, but we can be more elegant with this by using [Optim.jl](https://julianlsolvers.github.io/Optim.jl/stable/), by optimizing univariate functions. Optim.jl will find a minima over a bounded range of any single argument function using the [golden-section search](https://en.wikipedia.org/wiki/Golden-section_search) algorithm.
+The temptation here is to brute-force search over the $\dot{u}^\phi$ parameter space until some stability condition is met, but we can be more elegant with this by using [Optim.jl](https://julianlsolvers.github.io/Optim.jl/stable/), which optimizes (i.e. finds the minima of) univariate functions. Optim.jl searches over a bounded range of any single argument function using the [golden-section search](https://en.wikipedia.org/wiki/Golden-section_search) algorithm.
 
 For our purposes, the implementation needs a function which describes the degree of _circularity_ of our orbits, which is effectively just $\mathcal{Q}_\text{s}$ from eq. \eqref{eq:Qs}. 
 
@@ -548,7 +548,7 @@ Calculating the energy for each orbit and plotting these again eq. \eqref{eq:Emu
 
 Of course, the region within the photon orbit is impossible to probe with this technique, since the integrator cannot handle this domain. The negative energy regimes are therefore also impossible to discover with this method. Nevertheless, it proves reliable for finding stable orbits, up to the initial domain of the bounding window. 
 
-I'd also note here that this prototype code is able to those 100 stable orbits in just under a second, with approximately O($n$) scaling. Some aspects of this method could be optimized, but that is beyond the intention of this blog post.
+I'd also note here that this prototype code is able to discover those 100 stable orbits in just under a second, with approximately O($n$) scaling. Some aspects of this method could be optimized, but that is beyond the intention of this blog post.
 
 ## Discussion
 
