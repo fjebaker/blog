@@ -42,7 +42,9 @@ The standard, static, axis-symmetric, and asymptotically flat spacetime line ele
 
 where $\omega = -\frac{\tensor{g}{}{\phi t}}{\tensor{g}{}{\phi \phi}}$. 
 
-In this context, the word *static* simply means *doesn't change with time* ($\frac{\partial}{\partial t} g_{\mu\nu} = 0$), axis-symmetric implies invariance under translations in $\phi$ (things look the same when you rotate), and asymptotically flat means the metric reduces to the Minkowski metric, $\eta$, for $r \rightarrow \infty$. 
+We differentiate *stationary* and static *static*, where a stationary means the components of the metric *do not change with time* ($\frac{\partial}{\partial t} g_{\mu\nu} = 0$), and static adds symmetry under time parity, or simply that $t \rightarrow -t$ does not change the metric.
+
+Then axis-symmetric implies invariance under translations in $\phi$ (things look the same when you rotate), and asymptotically flat means the metric reduces to the Minkowski metric, $\eta$, for $r \rightarrow \infty$. 
 
 These metrics govern the structure of spacetime in the vicinity of some central singularity, and are all we need to study a black hole and its orbits.
 
@@ -311,19 +313,19 @@ which solves for an inequality $r > r_\text{ISCO}$, which is in the Bardeen pape
 
 ### Marginally bound orbits
 
-In direct contrast to the ISCO, we consider unstable circular orbits. All such _unbound_ circular orbits have hyperbolic energies $\frac{E}{\mu} > 1$, or stated simply, perturbations to the energy will cause the orbit to diverge.
+In direct contrast to the ISCO, we consider unstable circular orbits at $r < r_\text{ISCO}$. All such _unbound_ circular orbits have hyperbolic energies (will diverge from circular orbits when perturbed), with a specific radius hosting the _marginally bound_ orbits, defined as $r$ where $\frac{E}{\mu} = 1$. Any small perturbation of such a marginally bound orbit outwards will escape the black hole, but with asymptotically zero velocity.
 
-An unbound orbit is then an orbit at $r > r_{\text{mb}}$, the _marginally bound_ radius, defined for the Kerr metric as
+The _marginally bound_ radius is may be solved for the Kerr metric as
 
 \begin{equation}
     r_{\text{mb}} = 2M \mp a + 2 \sqrt{M^2 \mp aM },
 \end{equation}
 
-corresponding to first (infalling) radius at which $\frac{E}{\mu} = 1$.
+corresponding to first (infalling) radius at which the condition $\frac{E}{\mu} = 1$ is satisfied.
 
 ### Photon orbit
 
-Photons are null geodesics with $\mu=0$, and, due to this, cannot form stable circular orbits anywhere except at a one particular radius, known as the _photon radius_, denoted $r_\text{ph}$. This radius is where $\frac{E}{\mu} \rightarrow \infty$, or, equivalently, where
+Photons are null geodesics with $\mu=0$, and, due to this, cannot form circular orbits anywhere except at a one particular radius, known as the _photon radius_, denoted $r_\text{ph}$. This radius is where $\frac{E}{\mu} \rightarrow \infty$, or, equivalently, where
 
 \begin{equation}
 r^2 - 3Mr \pm 2 a \sqrt{M r} = 0, 
@@ -339,7 +341,9 @@ r_\text{ph} = 2M \left[
 \right].
 \end{equation}
 
-The photon orbit represents, if you will, the innermost possible (unstable) circular orbit. Orbits between $r_\text{ph}$ and $r_\text{mb}$ will not form circular orbits, as they have extremely hyperbolic energies $\frac{E}{\mu} > 1$ and will quickly and catastrophically collapse.
+The photon orbit represents, if you will, the innermost possible (unstable) circular orbit, which requires velocity equal to the speed of light. Orbits between with $r_\text{ph} < r < r_\text{ISCO}$ can only form unstable circular orbits, which may quickly and catastrophically collapse.
+
+Analogous to the marginally bound orbits, the unstable orbits at the photon orbit, if perturbed outwards, will arrive at infinity still traveling at the speed of light.
 
 ## Tracing circular orbits
 
