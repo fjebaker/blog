@@ -1,4 +1,5 @@
 __site/
+__extra/
 .DS_Store
 node_modules/
 package-lock.json
@@ -6,3 +7,4 @@ package-lock.json
 menu1.md
 menu2.md
 menu3.md
+Manifest.toml
