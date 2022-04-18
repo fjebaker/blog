@@ -1,8 +1,8 @@
 @def title = "Uniform projections of spherical distributions"
-@def description = ""
+@def description = "Motivated by a lamp post, I want to find some projection of points on a sphere, which ensures that their shadow is uniformly and equidistantly distributed. Moreover, I want these points to be parameterized by a single real value, such that I can easily generate these distributions in software projects."
 @def image = "/assets/distributions/uniform-2-sphere.svg"
 @def date = "14/04/2022"
-@def tags = ["2022", "mathematics", "julia", "probability"]
+@def tags = ["2022", "mathematics", "julia", "projections"]
 
 # Uniform projections of spherical distributions
 
