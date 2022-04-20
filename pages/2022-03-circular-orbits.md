@@ -425,7 +425,7 @@ The integration is run for a total affine time of $1200\,\text{s}$, as up until 
 We can investigate the stability of the integrator by setting the integration time to $10,000\,\text{s}$, and tracing all possible circular orbits for a specific $M$ and $a$. A _measure of deviation_ we employ is designed to tell us if the orbit collapsed inwards or outwards, and is calculated
 
 \begin{equation}
-    \mathcal{Q}_\text{d} = \frac{1}{r_\text{init}^2} \sum_{i=1} r_i^2,
+    \mathcal{Q}_\text{d} = \frac{1}{N\,r_\text{init}^2} \sum_{i=1} r_i^2,
 \end{equation}
 
 such that we can distinguish three cases:
