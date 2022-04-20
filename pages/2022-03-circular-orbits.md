@@ -1,10 +1,10 @@
-@def title = "Circular orbits in static, axis-symmetric spacetimes"
-@def description = "I'd like to be able to calculate programmatically key results related to circular orbits in static, axis-symmetric spacetimes. To this end, I want to see how feasible a computer aided approach is, using only a handful of constraints, in re-deriving known analytic solutions, and compare this to automated circular orbit discovery using our geodesic integrator."
+@def title = "Hunting circular orbits of the Kerr metric"
+@def description = "I'd like to be able to calculate programmatically key results related to circular orbits in generic spacetimes. To this end, I want to see how feasible a computer aided approach is, using only a handful of constraints, in re-deriving known analytic solutions, and compare this to automated circular orbit discovery using our geodesic integrator, focusing on the Kerr metric."
 @def image = "/assets/stablecirc.svg"
 @def date = "02/03/2022"
 @def tags = ["2022", "geodesics", "julia", "relativity"]
 
-# Circular orbits in static, axis-symmetric spacetimes
+# Hunting circular orbits of the Kerr metric
 
 <!--
 Johannsen and Psaltis 2011
@@ -19,7 +19,7 @@ Igata et al 2020
 
 I'm going to try and re-derive 50 year old results in a day, programmatically, with modern computers, and see how close I can get. 
 
-We'll look at results for orbits in the Kerr metric, using a mathematical approach that can be scripted for other static, axis-symmetric spacetimes, which is the underlying motivation; can we get a good enough of an approximation of tailored, analytic solutions to merit writing generic code for alternative metrics?
+We'll look at results for orbits in the Kerr metric, using a mathematical approach that can be scripted for other static, axis-symmetric spacetimes (though generic analytic results exist, to be explored in a future blog post), which is the underlying motivation; can we get a good enough of an approximation of tailored, analytic solutions to merit writing generic code for alternative metrics?
 
 Of particular importance when studying metrics are the permitted circular orbits, especially for creating observational tests, as the orbits are used to model processes in e.g. accreting matter. Such trajectories also allow for the calculation of redshift values for discs when ray tracing, which in turn allows us to visualize and simulate other processes, such as flux. The little exploration here will hopefully lead to automated stable orbit discovery with [our integrator](https://github.com/astro-group-bristol), and (hopefully) allow us to eventually simulate arbitrary disc profiles for different metrics.
 
@@ -554,9 +554,9 @@ I'd also note here that this prototype code is able to discover those 100 stable
 
 We can get good approximations of analytic solutions using both SageMath and integrator-driven automated circular orbit discovery. Both methods are faced with limitations, however, in how they (fail to) probe within the photon radius. 
 
-In the case of the SageMath, the negative energy description is entirely lost, and the angular momenta within the photon radius are inaccurate at best. When using the integrator, we cannot even probe within this radius reliably. It also has a practical limitation; SageMath is an unreliable solver at the best of times. Often the expressions it produces when invoking its `solve` function are a mess, if it is able to solve them at all. I do not know how _well_ this work will apply to metrics more complex than Kerr (which is the intended purpose after all). Though fortunately it seems that some fairly generic operations can go some distance to remedying this.
+In the case of the SageMath, the negative energy description of the Kerr metric is entirely lost, and the angular momenta within the photon radius are inaccurate at best. When using the integrator, we cannot even probe within this radius reliably. It also has a practical limitation; SageMath is an unreliable solver at the best of times. Often the expressions it produces when invoking its `solve` function are a mess, if it is able to solve them at all. I do not know how _well_ this work will apply to metrics more complex than Kerr (which is the intended purpose after all). Though fortunately it seems that some fairly generic operations can go some distance to remedying this.
 
-SageMath merits further investigation, and I will make the relevant SageMath notebooks for recreating the analysis in this blog available soon. 
+SageMath merits further investigation, and I will make the relevant SageMath notebooks for recreating the analysis in this blog available at some point. 
 
 The integrator suffers from an initial guess problem for the rolling window bounds on the possible range of $\dot{u}^\phi$, but other than that is able to work without issue directly from the input metric. It is also able to describe _enough_ of the space of circular orbits that the different orbital boundaries are visible, and will no doubt prove to be useful when studying other metrics.
 
@@ -564,7 +564,7 @@ Overall, I am pleased with how well the integrator performs for such orbits, and
 
 ### Future work
 
-The next step is to apply this work to modified Kerr metrics, and to assemble a full pipeline for either deriving and wrapping symbolic expressions into Julia functions (related to cleaning the SageMath notebooks), or a pipeline for automatic orbit discovery in the integrator ecosystem (related to committing the above Julia code). This will then be used to calculate the redshift values for geometrically thin discs in the equatorial plane, to move the integrator in the direction of _observational results purely from metrics_.
+The next step is to apply this work to general static, axis-symmetric spacetimes and modified Kerr metrics, and to assemble a full pipeline for either deriving and wrapping symbolic expressions into Julia functions, or a pipeline for automatic orbit discovery in the integrator ecosystem. This will then be used to calculate the redshift values for geometrically thin discs in the equatorial plane, to move the integrator in the direction of _observational results purely from metrics_.
 
 Another avenue to later explore are the class of spherical orbits, which are not constrained to the equatorial plane, but nevertheless are able to maintain a constant radius.
 
