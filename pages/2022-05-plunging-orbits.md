@@ -1,5 +1,5 @@
 @def title = "Plunging photons out of stable orbits"
-@def description = "I'd like to be able to calculate programmatically key results related to circular orbits in generic spacetimes. To this end, I want to see how feasible a computer aided approach is, using only a handful of constraints, in re-deriving known analytic solutions, and compare this to automated circular orbit discovery using our geodesic integrator, focusing on the Kerr metric."
+@def description = "Let's revisit some circular orbit calculations with a new analytic approach, and extend the domain of equitorial accreting velocities down close to the black hole, into the so-called plunging region. This should permit us to then fully calculate redshift images of thin accretion discs."
 @def image = "/assets/plunging/dilaton-cover.png"
 @def date = "09/05/2022"
 @def tags = ["2022", "geodesics", "julia", "relativity"]
