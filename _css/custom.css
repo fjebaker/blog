@@ -43,16 +43,29 @@ nav li a {
 
 .summary-container {
     margin-bottom: 40px;
+    outline: 1px solid rgb(0, 0, 0);
+    padding-top: 8px;
+    padding-right: 20px;
+    border-radius: 10px;
 }
 
 .summary-column h2 {
     margin-top: 10px;
 }
 
+.summary-frame {
+    height: 100%;
+    line-height: 100%;
+    flex: 50%;
+    position: relative;
+}
+
 .summary-image {
     border-radius: 10px;
     padding-left: 0px !important;
     height: 100%;
+    padding-top: 20px;
+    padding-bottom: 20px;
 }
 
 .summary-column {
