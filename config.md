@@ -24,3 +24,4 @@ global latex commands
 \newcommand{\deriv}[2]{\frac{\d#1}{\d#2}}
 \newcommand{\pderiv}[2]{\frac{\partial#1}{\partial#2}}
 \newcommand{\sign}{\text{sign}\,}
+\newcommand{\iprod}[2]{\langle #1 , #2 \rangle}

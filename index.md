@@ -1,10 +1,6 @@
 @def title = "/var/log/fjebaker.log"
 @def date = "01/01/2022"
 
-# Research notes
+# Posts
 
-Coming soon...
-
-# Chronological blog posts
-
-{{post_summaries}}
+{{posts_chronological 100}}
