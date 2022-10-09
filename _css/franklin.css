@@ -3,11 +3,14 @@
 ================================================================== */
 
 :root {
-  --block-background: hsl(0, 0%, 94%);
-  --output-background: hsl(0, 0%, 98%);
+  --block-background: rgb(32, 32, 35);
   --small: 14px;
-  --normal: 19px;
-  --text-color: hsv(0, 0%, 20%);
+  --normal: 18px;
+  --text-color: rgb(204, 164, 124);
+  --background-color: rgb(20,19,17);
+  /* --brand-color: rgb(113, 133, 136); */
+  /* --brand-color: rgb(255,170,177); */
+  --brand-color: rgb(171, 215, 206);
 }
 
 /* ==================================================================
@@ -15,9 +18,11 @@
 ================================================================== */
 
 html {
-  font-family: "Computer Modern Serif", Arial, sans-serif;
+  /* font-family: "Computer Modern Serif", Arial, sans-serif; */
+  font-family: Arial, serif;
   font-size: var(--normal);
   color: var(--text-color);
+  background-color: var(--background-color);
 }
 
 /* ==================================================================
@@ -55,14 +60,12 @@ html {
 
 .franklin-content .page-foot a {
   text-decoration: none;
-  color: #a6a2a0;
   text-decoration: underline;
 }
 
 .page-foot {
   font-size: 80%;
   font-family: Arial, serif;
-  color: #a6a2a0;
   text-align: center;
   margin-top: 6em;
   border-top: 1px solid lightgrey;
@@ -79,27 +82,26 @@ html {
   margin: 0.6rem 0;
 }
 
-.franklin-content {
-  position: relative;
-  padding-left: 12.5%;
-  padding-right: 12.5%;
-  line-height: 1.35em;
+@media (min-width: 300px) {
+  .franklin-content {
+    width: 100%;
+    padding: 5px;
+  }
 }
 
-/* On wide screens, fix content width to a max value. */
-@media (min-width: 940px) {
+@media (min-width: 600px) {
   .franklin-content {
-    max-width: 905px;
+    width: 60%;
     margin-left: auto;
     margin-right: auto;
   }
 }
 
-/* On narrow device, reduce margins. */
-@media (max-width: 480px) {
+@media (min-width: 1440px) {
   .franklin-content {
-    padding-left: 6%;
-    padding-right: 6%;
+    width: 50%;
+    margin-left: auto;
+    margin-right: auto;
   }
 }
 
@@ -118,6 +120,7 @@ h4,
 h5,
 h6 {
   text-align: left;
+  color: var(--brand-color); 
 }
 
 .franklin-content h1 {
@@ -130,7 +133,7 @@ h6 {
 .franklin-content h2 {
   padding-bottom: 0.3em;
   border-bottom: 1px solid lightgrey;
-  margin-top: 2em;
+  margin-top: 1.5em;
   margin-bottom: 1em;
 }
 
@@ -187,7 +190,7 @@ td {
 }
 
 .franklin-content a {
-  color: #004de6;
+  color: rgb(255, 136, 146);
   text-decoration: none;
 }
 
@@ -276,6 +279,11 @@ body { counter-reset: eqnum; }
   padding-right: 5px;
 }
 
+.nonumber .katex-display::after {
+  counter-increment: nothing;
+  content: "";
+}
+
 /* ==================================================================
     CODE & HIGHLIGHT.JS
 ================================================================== */
@@ -301,17 +309,21 @@ code {
   font-size: var(--small);
   line-height: 1.35em;
   border-radius: 10px;
+  color: rgb(132, 151, 154);
 }
 
-.hljs-meta,
-.hljs-metas,
-.hljs-metap { font-weight: bold; }
+.hljs-keyword, .hljs-selector-tag, .hljs-subst {
+	color: rgb(137, 196, 206);
+	font-weight: 700;
+}
 
-.hljs-meta { color: rgb(25, 179, 51); }
+.hljs-meta { 
+  font-weight: bold;
+  color: rgb(137, 196, 206);
+}
 
-.hljs-metas { color: red; }
-
-.hljs-metap { color: rgb(51, 131, 231); }
+.hljs-meta.shell_ {color: crimson;}
+.hljs-meta.prompt_ {color: rgb(25, 179, 51);}
 
 .code-output {
   background: var(--output-background);
@@ -323,7 +335,6 @@ code {
 ================================================================== */
 
 .franklin-content .colbox-blue {
-  background-color: #eef3f5;
   padding-top: 5px;
   padding-right: 10px;
   padding-left: 10px;
@@ -333,4 +344,12 @@ code {
   margin-bottom: 5px;
   border-radius: 0 10px 10px 0;
   border-left: 5px solid #4c9cf1;
+}
+
+.franklin-content .fndef td { 
+  background-color: var(--background-color);
+}
+
+.franklin-content .fndef tr {
+	border: 0px;
 }
