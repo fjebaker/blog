@@ -77,7 +77,6 @@ function format_summary(b::BlogPost)
                 <small style="color: grey;"><i> $(date)</i></small>
                 <p style="text-align: right;"> <small id="view-text"> ☞ View post </small> </p>
             </a>
-            <hr>
         </div>
     </div>
     """
