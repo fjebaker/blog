@@ -3,11 +3,11 @@
 ================================================================== */
 
 :root {
-  --block-background: rgb(32, 32, 35);
+  --block-background: rgb(242, 242, 242);
   --small: 14px;
   --normal: 18px;
-  --text-color: rgb(168, 162, 197);
-  --background-color: rgb(20, 23, 22);
+  --text-color: rgb(139, 133, 172);
+  --background-color: rgb(255, 255, 255);
   /* --brand-color: rgb(113, 133, 136); */
   /* --brand-color: rgb(255,170,177); */
   --brand-color: rgb(171, 215, 206);
@@ -190,7 +190,7 @@ td {
 }
 
 .franklin-content a {
-  color: rgb(255, 136, 146);
+  color: rgb(253, 187, 193);
   text-decoration: none;
 }
 
@@ -202,8 +202,8 @@ td {
     HYPERREFS AND FOOTNOTES
 ================================================================== */
 
-.franklin-content .eqref a { color: green; }
-.franklin-content .bibref a { color: green; }
+.franklin-content .eqref a { color: rgb(136, 208, 136); }
+.franklin-content .bibref a { color: rgb(223, 175, 31); }
 
 .franklin-content sup {
   font-size: 70%;
