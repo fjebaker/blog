@@ -32,6 +32,12 @@
     <priority>0.5</priority>
 </url>
 <url>
+    <loc>posts/2022.02.01.nginx-with-titan2/index.html</loc>
+    <lastmod>2022-11-08</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+</url>
+<url>
     <loc>posts/2022-06-tetrads/index.html</loc>
     <lastmod>2022-11-08</lastmod>
     <changefreq>monthly</changefreq>
@@ -45,6 +51,12 @@
 </url>
 <url>
     <loc>tags/index.html</loc>
+    <lastmod>2022-11-08</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+</url>
+<url>
+    <loc>posts/2022.09.13.migrating-older-hardware/index.html</loc>
     <lastmod>2022-11-08</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>

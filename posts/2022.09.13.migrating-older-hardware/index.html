@@ -1,0 +1,120 @@
+<!doctype html> <html lang=en > <meta charset=UTF-8 > <meta name=viewport  content="width=device-width, initial-scale=1"> <link rel=stylesheet  href="/blog/libs/highlight/github.min.css"> <!-- <script src="https://unpkg.com/lunr/lunr.js"></script> <script src="/blog/libs/lunr/lunr.min.js"></script> <script src="/blog/libs/lunr/lunr_index.js"></script> <script src="/blog/libs/lunr/lunrclient.min.js"></script> --> <link rel=stylesheet  type="text/css" href="https://cdn.jsdelivr.net/gh/aaaakshat/cm-web-fonts@latest/fonts.css"> <link rel=stylesheet  href="/blog/css/franklin.css"> <link rel=stylesheet  href="/blog/css/basic.css"> <link rel=stylesheet  href="/blog/css/custom.css"> <link rel=stylesheet  href="/blog/css/katex_custom.css"> <link rel=stylesheet  href="/blog/css/admonitions.css"> <link rel=icon  href="/blog/assets/favicon.ico"> <title>Migrating to older hardware</title> <header> <div class=blog-name ><a href="/blog/"><code style="font-size:20px;">/var/log/fjebaker.log</code></a></div> <div class=blog-header > <div> <div id=menu-nav > <nav> <ul> <li><a href="/blog/">Home</a> </ul> </nav> </div> <!-- <div style="margin-right: 0.5em;"> <form id=lunrSearchForm  name=lunrSearchForm > <input class=search-input  name=q  placeholder="Enter search term" type=text > <input type=submit  value=Search  formaction="/blog/search/index.html"> </form> </div> --> </div> </div> </header> <div class=franklin-content ><h1 id=migrating_to_older_hardware ><a href="#migrating_to_older_hardware" class=header-anchor >Migrating to older hardware</a></h1> <p><em>This post is cross-posted from my gemini capsule: <code>gemini://gemlog.cosroe.com</code>.</em></p> <p>I have been working on migrating the gemini server driving this capsule from a Raspberry Pi 4 to an old Raspberry Pi 2, and transitioning from Titan2 &#40;written in Go&#41; to a server implemented in Zig &#40;and therefore made cooler&#41; in order to flesh out some custom features. The motivation behind this transition is that I need my Raspberry Pi 4 for another project, and with the ongoing electronic component shortage, it is still nearly impossible to acquire new hardware.</p> <p>The aim is to continue using NGINX as a load balancer and proxy server, however due to the memory and architecture limitations of the Raspberry Pi 2, this can&#39;t really be dockerized anymore. I&#39;m also interested in using the NGINX NJS &#40;ECMAScript&#41; stream modules, for which there are unfortunately no armv6 binaries. </p> <p>I also have very little experience with Zig, but I am very motivated to learn the language, so this is a good excuse.</p> <h2 id=nginx_with_njs_from_source ><a href="#nginx_with_njs_from_source" class=header-anchor >NGINX with NJS from source</a></h2> <p>To begin with, I installed NGINX with <code>apt</code> and used</p> <pre><code class="bash hljs">sudo nginx -V 2&gt;&amp;1</code></pre>
+<p>to get all of the build flags used for the armv6 binary. NGINX may subsequently then be removed with <code>apt</code> again. </p>
+<p>Next, I cloned the GitHub mirrors of the NGINX source</p>
+<pre><code class="bash hljs">git <span class=hljs-built_in >clone</span> https://github.com/nginx/nginx \\
+    &amp;&amp; git <span class=hljs-built_in >clone</span> https://github.com/nginx/njs \\
+    &amp;&amp; <span class=hljs-built_in >mv</span> njs nginx/ \\
+    &amp;&amp; <span class=hljs-built_in >cd</span> nginx</code></pre>
+<p>This was soon followed by a series of attempts at running the configure script with the build flags pinched from the <code>apt</code> binary. As expected, I had a number of missing dependencies, but was able to eventually get everything to work by installing the following</p>
+<pre><code class="bash hljs">sudo apt install javascript-common libnginx-mod-stream nodejs libxslt1.1 libxslt1-dev libgeoip-dev</code></pre>
+<p>I am unsure why I needed to install <code>libnginx-mod-stream</code> again, but I received some dynamic linker errors when this wasn&#39;t installed. I&#39;m happy to ignore it being there if it&#39;s happy to let me run my code c:</p>
+<p>The awful configure command that eventually worked:</p>
+<pre><code class="bash hljs">./auto/configure \ 
+    --with-cc-opt=<span class=hljs-string >&#x27;-g -O2 -fstack-protector-strong -Wformat -Werror=format-security -fPIC -Wdate-time -D_FORTIFY_SOURCE=2&#x27;</span> \
+    --with-ld-opt=<span class=hljs-string >&#x27;-Wl,-z,relro -Wl,-z,now -fPIC&#x27;</span> \
+    --prefix=/usr/share/nginx \
+    --conf-path=/etc/nginx/nginx.conf \
+    --http-log-path=/var/log/nginx/access.log \
+    --error-log-path=/var/log/nginx/error.log \
+    --lock-path=/var/lock/nginx.lock \
+    --pid-path=/run/nginx.pid \
+    --modules-path=/usr/lib/nginx/modules \
+    --http-client-body-temp-path=/var/lib/nginx/body \
+    --http-fastcgi-temp-path=/var/lib/nginx/fastcgi \
+    --http-proxy-temp-path=/var/lib/nginx/proxy \
+    --http-scgi-temp-path=/var/lib/nginx/scgi \
+    --http-uwsgi-temp-path=/var/lib/nginx/uwsgi \
+    --with-debug \
+    --with-pcre-jit \
+    --with-http_ssl_module \
+    --with-http_stub_status_module \
+    --with-http_realip_module \
+    --with-http_auth_request_module \
+    --with-http_v2_module \
+    --with-http_dav_module \
+    --with-http_slice_module \
+    --with-threads \
+    --with-http_addition_module \
+    --with-http_geoip_module=dynamic \
+    --with-http_gunzip_module \
+    --with-http_gzip_static_module \
+    --with-http_sub_module \
+    --with-http_xslt_module=dynamic \
+    --with-stream=dynamic \
+    --with-stream_ssl_module \
+    --with-stream_ssl_preread_module \
+    --with-mail=dynamic \
+    --with-mail_ssl_module \
+    --add-dynamic-module=$(<span class=hljs-built_in >pwd</span>)/njs/nginx</code></pre>
+<p>The output of configure is a Makefile can be built with my whole 1 processors in just under an hour.</p>
+<pre><code class="bash hljs">make &amp;&amp; sudo make install</code></pre>
+<p>The <code>install</code> command seems to put some things in the wrong place &#40;?&#41;, but just symbolically linking the modules directory to wherever it says it needs it seems to be sufficient.</p>
+<p>Finally, I link the binary somewhere into my <code>PATH</code> and copy the template systemd service file that installing via <code>apt</code> seems to leave behind &#40;just <code>systemctl status --all</code>&#41;, modify the service paths appropriately, and relink it for the daemon. Voila, NGINX avec NJS.</p>
+<h2 id=the_zig_server ><a href="#the_zig_server" class=header-anchor >The zig server</a></h2>
+<p><a href="https://github.com/fjebaker/cozroe">cozroe source code</a></p>
+<p>The Zig server I am in the process of building &#40;affectionately named cozroe&#41; is based on MasterQ32&#39;s <code>zig-serve</code> gemini implementation using WolfSSL.</p>
+<p><a href="https://github.com/MasterQ32/zig-serve">MasterQ32/zig-serve</a></p>
+<p>I wrote a number of small patches before I was able to adequately build it with Zig v0.10, due to some zig shadowing rules that WolfSSL violated. After that, it&#39;s pretty trivial to put together a basic file server. My implementation is pretty terrible but it does what it needs to, namely: </p>
+<ul>
+<li><p>map <code>/</code> to <code>/index.gmi</code>.</p>
+
+<li><p>sanitize all other paths, and return the file they point to</p>
+
+</ul>
+<p>For my particular raspi, I had a few issues cross-compiling Zig until I found the right CPU architecture – for posterity, I built with</p>
+<pre><code class="bash hljs">zig build -Dtarget=arm-linux-musleabi -Dcpu=arm1176jzf_s -Drelease-small</code></pre>
+<h2 id=monitoring_metrics ><a href="#monitoring_metrics" class=header-anchor >Monitoring metrics</a></h2>
+<p>I am a little curious how many people would actually find this capsule, so the next step was to add a SQLite database to store &#40;hashes of&#41; remote addresses and the time of connection, so I can do a little bit of metric monitoring. With nektro&#39;s amazing zigmod, this is only a few zig dependencies away, and soon I was connected to an SQLite database with command line arguments parsing.</p>
+<p><a href="https://github.com/nektro/zigmod">nektro/zigmod</a> <a href="https://github.com/Hejsil/zig-clap">Hejsil/zig-clap</a> <a href="https://github.com/vrischmann/zig-sqlite">vrischmann/zig-sqlite</a></p>
+<p>But oh no; NGINX proxy pass for TCP streams does&#39;t have facilities for forwarding remote addresses, and so all of my connections are localhosts D:</p>
+<p>This is where I tried a number of things to get the remote address to the backend before the backend has finished handling the request:</p>
+<ul>
+<li><p>use Telegraf to inject straight into the SQLite database. This turned out to be far too heavy for my little raspi and also it turns out logs are written after NGINX has finished processing the full request, which would mean the zig server would be waving goodbye to the response before it was told who sent the initial request.</p>
+
+<li><p>pass the remote address as a query parameter in the URL, but this doesn&#39;t work because the TLS handshake takes place at the backend and not in NGINX, so I can&#39;t modify the URL.</p>
+
+<li><p>use the proxy protocol to wrap additional information. Again, a bit tricky without heavily modifying zig-serve, which I don&#39;t feel confident enough to do with my current zig understanding.</p>
+
+</ul>
+<p>So instead, this is where I need the ECMAScript module for NGINX, to inject a little bit of custom behaviour when NGINX picks up a stream:</p>
+<pre><code class="js hljs"><span class=hljs-keyword >var</span> fs = <span class=hljs-built_in >require</span>(<span class=hljs-string >&#x27;fs&#x27;</span>);
+
+<span class=hljs-keyword >function</span> <span class="hljs-title function_">validate</span>(<span class=hljs-params >s</span>) {
+    s.<span class="hljs-title function_">on</span>(<span class=hljs-string >&#x27;upload&#x27;</span>, <span class=hljs-keyword >async</span> <span class=hljs-keyword >function</span> (<span class=hljs-params >data, flags</span>) {
+        <span class=hljs-keyword >var</span> time_millis = (<span class=hljs-keyword >new</span> <span class="hljs-title class_">Date</span>()).<span class="hljs-title function_">getTime</span>();
+        <span class=hljs-keyword >var</span> info = <span class=hljs-string >`<span class=hljs-subst >${time_millis}</span>|<span class=hljs-subst >${s.variables.time_local}</span>|<span class=hljs-subst >${s.remoteAddress}</span>\n`</span>;
+        <span class=hljs-comment >// write to a file</span>
+        fs.<span class="hljs-title function_">appendFileSync</span>(<span class=hljs-string >&quot;/tmp/cozroe.gemini.addr&quot;</span>, info);
+
+        s.<span class="hljs-title function_">done</span>(<span class=hljs-number >0</span>);
+    });
+}
+
+<span class=hljs-keyword >export</span> <span class=hljs-keyword >default</span> {validate}</code></pre>
+<p>I don&#39;t know why I called this function validate – it made sense at the time, but what it does is it gets a stream packet, attaches a callback when the packet has new data for the backend, and then logs two time formats and the remote address to a temporary file, before clearing the packet to continue.</p>
+<p>I add this to my configuration file using the <code>js_access</code> directive:</p>
+<pre><code class="bash hljs">stream {
+    <span class=hljs-comment ># ... </span>
+
+    js_access sql_logger.validate;
+
+    <span class=hljs-comment ># gemini server</span>
+    server {
+        access_log /var/log/nginx/gemini_access.log gemini_log;
+        error_log /var/log/nginx/gemini_error.log warn;
+
+        <span class=hljs-comment ># ...</span>
+    }
+    
+    <span class=hljs-comment ># ...</span>
+}</code></pre>
+<p>The rest of the configuration is extremely similar to my previous post about NGINX setups for gemini. Next I just have to get cozroe to read it and dump it into the database, which is pretty straightforward.</p>
+<p>Currently, this would all fall apart under heavy traffic, but fortunately an easy extension to add is to compare the timestamps in the file with the time read by zig to work out roughly which request is currently being dealt with.</p>
+<p>But that&#39;s for a much, <em>much</em> later period in the future.</p>
+<p>And with that, our capsule is now running on older hardware, with more features, and able to count the total visits and unique visits to our little capsule c:</p>
+<div class=page-foot >
+  <div class=copyright >
+    &copy; Fergus Baker. Last modified: November 08, 2022. Website built with <a href="https://github.com/tlienart/Franklin.jl">Franklin.jl</a> and the <a href="https://julialang.org">Julia programming language</a>.
+  </div>
+</div>
+</div>

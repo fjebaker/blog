@@ -24,8 +24,9 @@ function BlogPost(f)
 
 
     tags = pagevar(f, :tags)
-    if isempty(tags)
+    if isnothing(tags) || isempty(tags)
         @warn "$f has no tags field."
+        tags = String[]
     end
 
     if isnothing(author)
@@ -35,7 +36,8 @@ function BlogPost(f)
         error("Post $f has no title")
     end
     if isnothing(summary)
-        error("Post $f has no summary")
+        @warn("Post $f has no summary")
+        summary = "No summary"
     end
     if isnothing(date)
         error("Post $f has no date")
