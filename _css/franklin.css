@@ -5,12 +5,12 @@
 :root {
   --block-background: rgb(242, 242, 242);
   --small: 14px;
-  --normal: 18px;
-  --text-color: rgb(139, 133, 172);
+  --normal: 20px;
+  --text-color: rgb(101, 90, 160);
   --background-color: rgb(255, 255, 255);
   /* --brand-color: rgb(113, 133, 136); */
   /* --brand-color: rgb(255,170,177); */
-  --brand-color: rgb(171, 215, 206);
+  --brand-color: rgb(87, 163, 148);
 }
 
 /* ==================================================================
@@ -190,7 +190,7 @@ td {
 }
 
 .franklin-content a {
-  color: rgb(253, 187, 193);
+  color: rgb(233, 142, 149);
   text-decoration: none;
 }
 
@@ -309,11 +309,11 @@ code {
   font-size: var(--small);
   line-height: 1.35em;
   border-radius: 10px;
-  color: rgb(132, 151, 154);
+  color: rgb(89, 116, 121);
 }
 
 .hljs-keyword, .hljs-selector-tag, .hljs-subst {
-	color: rgb(137, 196, 206);
+	color: rgb(90, 180, 196);
 	font-weight: 700;
 }
 
