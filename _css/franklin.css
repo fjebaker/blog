@@ -3,11 +3,11 @@
 ================================================================== */
 
 :root {
-  --block-background: rgb(242, 242, 242);
+  --block-background: rgb(226, 226, 226);
   --small: 14px;
   --normal: 20px;
-  --text-color: rgb(101, 90, 160);
-  --background-color: rgb(255, 255, 255);
+  --text-color: rgb(57, 31, 128);
+  --background-color: rgb(255, 246, 241);
   /* --brand-color: rgb(113, 133, 136); */
   /* --brand-color: rgb(255,170,177); */
   --brand-color: rgb(87, 163, 148);
@@ -309,20 +309,20 @@ code {
   font-size: var(--small);
   line-height: 1.35em;
   border-radius: 10px;
-  color: rgb(89, 116, 121);
+  color: rgb(60, 97, 104);
 }
 
 .hljs-keyword, .hljs-selector-tag, .hljs-subst {
-	color: rgb(90, 180, 196);
+	color: rgb(66, 160, 177);
 	font-weight: 700;
 }
 
 .hljs-meta { 
   font-weight: bold;
-  color: rgb(137, 196, 206);
+  color: rgb(180, 116, 233);
 }
 
-.hljs-meta.shell_ {color: crimson;}
+.hljs-meta.shell_ {color: rgb(218, 91, 116);}
 .hljs-meta.prompt_ {color: rgb(25, 179, 51);}
 
 .code-output {
