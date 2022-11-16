@@ -381,8 +381,28 @@ The factor $2$ comes from integrating the diverging terms that go as $1/\sqrt{x}
 
 ## Algorithmic caveats
 
-My implementation for calculating the transfer functions works well for $r_\text{em} < \sim 25 r_\text{g}$, but after this deviates from the Dauser et al. (2010) calculated table, and indeed even begins to produce increasingly large transfer function magnitudes for larger radii. My understanding is that this issue related to how the redshift is calculated at large impact parameters $\alpha$, $\beta$, corresponding to wide fields of view. I had already noticed that assuming $p^\mu u_\mu = 1$ for the photon energy at the observer adds a vignetting error to the redshift, since observer radii of $\sim 1000 \, r_\text{g}$ is only a _rough_ approximation of flat spacetime. Instead calculating $p^\mu u_\mu$ at the observer gives energies slighty different from $1$, approximately 1 part in 100 if I remember correctly.
+My implementation for calculating the transfer functions works well for $r_\text{em} < \sim 25 r_\text{g}$, but after this deviates from the Dauser et al. (2010) calculated table, and indeed even begins to produce increasingly large transfer function magnitudes for larger radii, where the colloquial _lower_ branch miraculously becomes the _upper_ branch. My understanding is that this issue related to how the redshift is calculated at large impact parameters $\alpha$, $\beta$, corresponding to wide fields of view. I had already noticed that assuming $p^\mu u_\mu = 1$ for the photon energy at the observer adds a vignetting error to the redshift, since observer radii of $\sim 1000 \, r_\text{g}$ is only a _rough_ approximation of flat spacetime. Instead calculating $p^\mu u_\mu$ at the observer gives energies slighty different from $1$, approximately 1 part in 100 if I remember correctly.
 
-This may then be resolved in two ways: either use the proper observer energy calculations, or simply move the observer back, scaling with $r_\text{em}$, keeping $\alpha$, $\beta$ small. I've opted for the latter, to keep the redshift equations consistent with those in Cunningham and Fabian et al. (1997).
+This _should_ then be resolved in two ways: either use the proper observer energy calculations, or simply move the observer back, scaling with $r_\text{em}$, keeping $\alpha$, $\beta$ small. I've opted for the latter, to keep the redshift equations consistent with those in Cunningham and Fabian et al. (1997). I will investigate the source of this deviation further at a later date.
 
-Another caveat is in the finite difference stencil -- depending on the sensitivity in the transfer function Jacobian at high $r_\text{em}$ or $a < \sim 0.8$, these methods sometimes require higher or lower orders, and there's no single value which works well for all cases, and also needs to be adjusted a little. Using a different algorithm (central vs forward, etc.) _could_ help here, but I am tempted instead to use automatic-differentiation, since the DifferentialEquations.jl solver support dual number types. This is something that will likely change in the future.
+~~~
+<p>
+<img src="./comp-moving-obs.svg" alt="" style="width:100%; padding: 0;"></img>
+</p>
+~~~
+
+Left panel does _not_ move the observer back as a function of $r_\text{em}$, whereas the right panel does.
+
+Another caveat is in the finite difference stencil -- depending on the sensitivity in the transfer function Jacobian at high $r_\text{em}$ or $a < \sim 0.8$, these methods sometimes require higher or lower orders, and there's no single value which works well for all cases, and also needs to be adjusted a little. Using a different algorithm (central vs forward, etc.) _could_ help here, but I am tempted instead to use automatic-differentiation, since the DifferentialEquations.jl solver support dual number types. This is something that will likely change in my implementation in the future, however for now we just dynamically change the stencil order.
+
+For example, using a finite stencil of order $4$ is too coarse at large emission radii, where the differences in redshifts over an emission ring can be very small with $\Delta g = g_\text{max} - g_\text{min} \approx 0.09$ at $r_\text{em} = 200$, versus $\Delta g \approx 0.5$ at $r_\text{em} = 4$ for $a=0.998$. This is reflected in numerical noise in the calculated transfer functions:
+
+~~~
+<p>
+<img src="./order-comp.svg" alt="" style="width:100%; padding: 0;"></img>
+</p>
+~~~
+
+Left panel is central finite difference stencil with order $4$, right panel is order $5$.
+
+Since most emissivity models for $\varepsilon$ assume some $r^{-\alpha}$ dependence, the terms at large radii are suppressed, and the noise in the functions is less important. I believe it is still worth mentioning, to illustrate how fiddly these calculations can be.
