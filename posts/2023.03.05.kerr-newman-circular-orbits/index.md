@@ -194,8 +194,6 @@ $$
 \pi_\nu = g_{\nu\mu}\dot{x}^\mu - q A_\nu = \dot{x}_\nu - q A_\nu.
 $$
 
-As a note, some authors define the electron charge as $q > 0$, including in the two papers I referenced that derive this. Hackmann and Xu (2013) use the convention I am adopting here and in Gradus.jl: the electron charge corresponds to $q < 0$. This is an important distinction, as it changes the sign in eq. \eqref{eq:canonical-momentum}. Note that this convention is only important here, since we see an isolated $q$ term. In the equations of motion from eq. \eqref{eq:geod}, we only see terms like $qQ$, where the relative signs are important.
-
 We therefore identify as usual $E = -\pi_t$ and $L_z = \pi_\phi$ as constants of motion, and 
 
 $$
@@ -207,9 +205,7 @@ We find $\dot{x}_t$ and $\dot{x}_\phi$ using $\Omega_\phi$, as in the previous b
 
 ![](./energy-charged.svg)
 
-For the case of $q=1$, we have $E \approx 1$ for the majority of orbits. The _marginally bound_ orbit is defined as the circular orbit with $E = 1$, so although these orbits are stable, they are not very tightly bound relative to the other setups. This has implications for a maximal charge quotient $qQ$ for which circular orbits may be found.
-
-For the case of $q = 1$, numerical limitations prevent fully describing the energetic system at small radii, as can be seen by blatant discontinuities in the curves, where the root finder has struggled to find solutions for $\Omega_\phi$.
+For the case of $q=1$, we have $E \approx 1$ for the majority of orbits. The _marginally bound_ orbit is defined as the circular orbit with $E = 1$, so although these orbits are stable, they are not very tightly bound relative to the other setups. This has implications for a maximal charge product $qQ$ for which circular orbits may be found. Numerical limitations furthermore prevent fully describing the energetic system at small radii, as can be seen by blatant discontinuities in the curves, where the root finder has struggled to find solutions for $\Omega_\phi$.
 
 We can find the ISCO by determining the minima of the energy of the circular orbits, i.e.
 
@@ -225,9 +221,19 @@ At $qQ = 1$, both curves are divergent and $r_\text{ISCO} \rightarrow \infty$. F
 
 For positive charge products, the ISCO initially decreases, reaching a minima, before increasing rapidly. The initial decrease may be thought of as the repulsion holding up the orbit and weakening the gravitational potential, allowing previously unstable orbits to become stable. The subsequent increase is interpreted as the EM repulsion overpowering gravity, suppressing the gravitational term in eq. \eqref{eq:geod}.
 
-
-
 ## Orbit finding approach
+
+Using the method I previously outlined in [another post](../2022.03.02.circular-orbits-kerr), Gradus.jl can automatically find stable circular orbits in the equatorial plane by minimizing some stability measure. It requires only the modified geodesic equation eq. \eqref{eq:geod}, and solves for some $v^\phi$ which minimizes the variations in $\Delta x^r$ over the course of the integration. It is therefore a good numerical test of the semi-analytic approach to ensure the model is at least self consistent.
+
+Plotting $L_z$ against $E$ is a method for analyzing the stability and classifying different orbits. For example, the ISCO is a minimum of both $E$ and $L_z$, and therefore on the $L_z - E$ plane corresponds to a cusp in the curve representing circular orbits.
+
+Plotting the analytic method (dashed) and the points determined by the circular orbit solver (crosses, connected by solid line):
+
+![](./el-plot-1.svg)
+
+Very good agreement is seen between the methods. This can also be used to more accurately determine the ISCO for the circular orbit solver, as sometimes the integrator is "too good" and classifies some unstable / marginally bound orbits as stable circular. These plots clearly identify the location of the ISCO energetically.
+
+## Line profiles
 
 [^kris]: Schroven, Kris, Eva Hackmann, and Claus Lämmerzahl. ‘Relativistic Dust Accretion of Charged Particles in Kerr-Newman Spacetime’. Physical Review D 96, no. 6 (26 September 2017): 063015. https://doi.org/10.1103/PhysRevD.96.063015.
 [^hackmann]: Hackmann, Eva, and Hongxiao Xu. ‘Charged Particle Motion in Kerr-Newmann Space-Times’. Physical Review D 87, no. 12 (24 June 2013): 124030. https://doi.org/10.1103/PhysRevD.87.124030.
