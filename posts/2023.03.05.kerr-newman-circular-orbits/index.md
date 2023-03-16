@@ -235,6 +235,74 @@ Very good agreement is seen between the methods. This can also be used to more a
 
 ## Line profiles
 
+The redshift is calculated using the regular
+
+$$
+g := \frac{\left. k^\nu u_{\nu} \right\rvert_{\text{obs}}}{\left. k^\mu u_\mu \right\rvert_\text{disc}},
+$$
+
+where we assume $\left. k^\nu u_{\nu} \right\rvert_{\text{obs}} = -1$ for simplicity, as the observer is assumed to be far enough from the singularity to be in flat space. Our calculation therefore simplifies to
+
+```julia
+using Tullio
+
+function redshift_charged(q)
+    function _f(m, gp, t)
+        x = gp.u2
+        g = Gradus.metric(m, x)
+        u = CircularOrbits.fourvelocity(m, x[2]; q = q)
+        @tullio o := -g[i, j] * gp.v2[i] * u[j]
+        inv(o)
+    end
+end
+```
+
+Here it is already implemented in a form that returns a function that we can use to create a `PointFunction` to use with the integrator. We can then calculate moderately high resolution line profiles with:
+
+```julia
+# set charge and build point function
+q = 1.0
+redshift_pf = PointFunction(redshift_charged(q))
+# position and disc configuration
+u = SVector(0.0, 1000.0, deg2rad(40), 0.0)
+d = GeometricThinDisc(0.0, 1000.0, π/2)
+# set up binning and calculate over fine grid
+bins = collect(range(0.1, 1.3, 200))
+g, f = @time lineprofile(
+    m,
+    u,
+    d,
+    bins = bins,
+    algorithm = BinnedLineProfile(),
+    plane = PolarPlane(GeometricGrid(); Nr = 700, Nθ = 1300, r_max = 50.0),
+    verbose = true,
+    redshift_pf = predshift_pf,
+    minrₑ = Gradus.isco(m, q = q),
+)
+```
+
+Plotting these:
+
+![](./high-charge-line-profiles.svg)
+
+The effect of the energetics of the charged orbits is clear in the line profiles. For the case of $q=1$, the circular orbit energy is pretty much constant for all stable orbits. This is particularly important around the ISCO radius, as that is where we can expect the maximal redshift. Consequently, the redshift of the line profile is much narrower. For the case of $q = -1$ we see the opposite effect, where the energy of the stable orbits varies to a greater extent, and therefore the line profile is significantly broadened. 
+
+The effect is somewhat similar to changing the inclination of the observer:
+
+![](./diff-incl-line-profiles.svg)
+
+The above is for the Schwarzschild case only.
+
+A "more realistic" scenario anticipates $Q$ to be very small, but could still allow $qQ \sim 1$. We can approximate this by setting e.g. $Q \approx 10^{-16}$ and $q \approx 10^{16}$, so that the charge does not affect the spacetime, and enters the model only through the Lorentz force in the geodesic equation.
+
+![](./low-charge-line-profiles.svg)
+
+Now the Schwarzschild and $qQ = 0$ case correspond exactly, but the dramatic effect of the charge is still very apparent.
+
+## Conclusion
+
+## References
+
 [^kris]: Schroven, Kris, Eva Hackmann, and Claus Lämmerzahl. ‘Relativistic Dust Accretion of Charged Particles in Kerr-Newman Spacetime’. Physical Review D 96, no. 6 (26 September 2017): 063015. https://doi.org/10.1103/PhysRevD.96.063015.
 [^hackmann]: Hackmann, Eva, and Hongxiao Xu. ‘Charged Particle Motion in Kerr-Newmann Space-Times’. Physical Review D 87, no. 12 (24 June 2013): 124030. https://doi.org/10.1103/PhysRevD.87.124030.
 [^tursunov]: Tursunov, Arman, Zdeněk Stuchlík, and Martin Kološ. ‘Circular Orbits and Related Quasiharmonic Oscillatory Motion of Charged Particles around Weakly Magnetized Rotating Black Holes’. Physical Review D 93, no. 8 (7 April 2016): 084012. https://doi.org/10.1103/PhysRevD.93.084012.
