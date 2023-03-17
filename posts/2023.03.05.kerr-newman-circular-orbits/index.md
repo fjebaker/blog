@@ -4,7 +4,7 @@
 
 # {{fill title}}
 
-In the last couple of days I've been trying to add the [Kerr-Newman](https://en.wikipedia.org/wiki/Kerr%E2%80%93Newman_metric) metric to [Gradus.jl](https://github.com/astro-group-bristol/Gradus.jl). The Kerr-Newman metric describes a black hole spacetime, with mass $M$, spin $a$, and charge $Q$. The metric may be expressed in Boyer-Lindquist coordinates as
+In the last couple of days I've been trying to add the [Kerr-Newman](https://en.wikipedia.org/wiki/Kerr%E2%80%93Newman_metric) metric to [Gradus.jl](https://github.com/astro-group-bristol/Gradus.jl). The Kerr-Newman metric describes a black hole spacetime with mass $M$, spin $a$, and charge $Q$. The metric may be expressed in Boyer-Lindquist coordinates as
 
 $$
 \d s^2 = 
@@ -22,16 +22,16 @@ $$
 $$
 
 
-Implementing the metric itself is straight forward, and now a new class of geodesic may be traced: those with non-zero charge per unit mass $q$, which therefore interact electromagnetically with the central singularity.
+Implementing the metric itself is straight forward, allowing for a new class of metric to be traced, namely those with non-zero charge per unit mass $q$. These are the particles which interact electromagnetically with the central singularity. We consider only time-like geodesics with charge.
 
-These have been studied in a number of papers, for example [Schroven, Hackmann and Lämmerzahl (2017)](#fndef:kris)[^kris], which studies in detail the innermost stable circular orbit (ISCO) for different charge configuration, and the effect this has on accreting matter of negative (electrons) and positive charge (protons/ions). There is also the earlier paper by [Hackmann and Xu (2013)](#fndef:hackmann)[^hackmann], which explores more generally the orbits of charged particles in the Kerr-Newman spacetime and classifies them into a number of classes to describe their behaviour. These works, and references therein, use the Hamilton-Jacobi formalism to calculate an effective potential on the four-velocity components, and use this to infer stable (circular) orbits and the ISCO. I would instead like to study this from a step back, directly from the 2nd order geodesic equation, with an Ansatz for the Lorentz force
+These have been discussed in a number of papers, for example [Schroven, Hackmann and Lämmerzahl (2017)](#fndef:kris)[^kris], which studies in detail the innermost stable circular orbit (ISCO) for different charge configuration, and the effect this has on accreting matter of negative (electrons) and positive charge (protons/ions). There is also the earlier paper by [Hackmann and Xu (2013)](#fndef:hackmann)[^hackmann], which explores more generally the orbits of charged particles in the Kerr-Newman spacetime and classifies them to describe their behaviour. These works, and references therein, use the Hamilton-Jacobi formalism with the Carter constant to calculate an effective potential on the four-velocity components, and use this to infer stable (circular) orbits and the ISCO. I would instead like to study this from a step back, directly from the 2nd order geodesic equation, using modern numerical methods. This means adding an Ansatz for the Lorentz force
 
 $$
 \label{eq:geod}
 \frac{\d^2}{\d \lambda^2} x^\mu = - \tensor{\Gamma}{\mu}{\alpha\beta} \dot{x}^\alpha \dot{x}^\beta + q \tensor{F}{\mu}{\alpha} \dot{x}^\alpha,
 $$
 
-where $\tensor{F}{\mu}{\alpha}$ is the Faraday tensor, and the dot denotes differentiation with respect to affine time $\lambda$. This second-order ordinary differential equation may be solved with some initial position $x^\mu$ and 3-velocity $\vec{\dot{x}}$, as $\dot{x}^t$ is constrained via
+where $\tensor{F}{\mu}{\alpha}$ is the Faraday tensor, and the dot denotes differentiation with respect to affine time $\lambda$. The second-order ordinary differential equation may be solved with some initial position $x^\mu$ and 3-velocity $\vec{\dot{x}}$, as $\dot{x}^t$ is constrained via
 
 $$
 \label{eq:constraint}
@@ -44,13 +44,13 @@ In this post, I would like to study the class of circular charged orbits in the 
 
 ## Faraday tensor
 
-The Faraday tensor for our purposes will be defined from the four-potential
+Starting from the four-potential[^kris]
 
 $$
 A_\mu = \frac{Q r}{\Sigma} \left(1 \d t - a \sin^2 \theta \d \phi \right),
 $$
 
-such that the Faraday tensor is
+the Faraday tensor is given by
 
 $$
 F_{\mu\nu} = \partial_\mu A_\nu - \partial_\nu A_\mu.
@@ -58,7 +58,7 @@ $$
 
 This means there are only 4 unique non-zero components of the anti-symmetric tensor, namely $F_{rt}, F_{\theta t}, F_{r\phi}, F_{r\theta}$, with the other 4 being their anti-symmetric counterparts.
 
-It is worth noting that with this potential, one must only consider the product of the particle and black hole charge $qQ$ in the equations of motion, since there are no terms that depend only on $q$ or $Q$. There are therefore 2 classes of solution we can expect depending on the sign of $qQ$. Similarly in the metric, only terms with $Q^2$ appear and consequently the parity is also lost. We therefore restrict ourselves to $Q \geq 0$ and allowing $q$ to take both negative and positive values to study all solution classes.
+It is worth noting that with this potential, one must only consider the product of the particle and black hole charge $qQ$ in the equations of motion, since there are no terms that depend solely on $q$ or $Q$. There are therefore 2 classes of solution we can expect depending on the sign of $qQ$. Similarly in the metric, only terms with $Q^2$ appear and consequently the parity is also lost. We therefore restrict ourselves to $Q \geq 0$ and allowing $q$ to take both negative and positive values without loss of generality.
 
 ## Keplerian angular velocity
 
@@ -90,7 +90,7 @@ $$
 
 which bears a factor $1/\dot{x}^t$ on the charge terms. The first term in this equation is a simple quadratic, but with these charge terms added, we require some way of eliminating or determining $\dot{x}^t$ in order to solve for $\Omega_\phi$.
 
-The only thing I can think to do here is to use eq. \eqref{eq:constraint}, and writing
+The only thing I can think to do here is to use eq. \eqref{eq:constraint}, and write
 
 $$
 \label{eq:ut}
@@ -99,7 +99,7 @@ $$
 
 One could then balance eq. \eqref{eq:expanded_geod} to have one term either side of the equals sign, substitute the $1/\dot{x}^t$, and square to obtain a quartic equation. Doing so also loses information about the sign of $q$, but that is something we could add in later. Although this is in theory then analytically solvable, in reality the expression is horrendous, and I cannot find a nice simple way of reducing the quartic into e.g. the product of two quadratics, or a depressing it to simplify the expression. There are no doubt other ways to tackle such an equation, but I am not versed in polynomial analysis and would have a hard time approaching the problem.
 
-For now, I'd instead prefer a semi-analytic approach, and use a root finder to solve for the solutions. Since the overall form of the equation is leading order quadratic, and we can _a priori_ select $\dot{x}^t$ that goes forwards in time, we may therefore anticipate classes of solutions for $\Omega_\phi$, corresponding to the prograde and retrograde orbits.
+For now, I'd instead prefer a semi-analytic approach, and use a root finder to solve for the solutions. Since the overall form of the equation is leading order quadratic, and we can _a priori_ select $\dot{x}^t$ that goes forwards in time, we may therefore anticipate classes of solutions for $\Omega_\phi$, corresponding to product set of prograde and retrograde orbits with positively and negatively charged particles.
 
 Implementing a short Julia function:
 
@@ -142,7 +142,7 @@ m = KerrNewmanMetric(M = 1.0, a = 0.0, Q = 0.9)
 rθ = SVector(3.0, π/2)
 ```
 
-I'd like to note that this picture is extremely unphysical. If a black hole _were to have charge_, it is likely that the charge is vanishingly small in the metric[^kris], and that the charge product $qQ$ is instead non-zero. But there is nothing in the mathematics that prevents us from exploring this class of spacetimes, so we will press on.
+I'd like to note that this picture is unphysical. If a black hole _were to have charge_, it is likely that the charge is vanishingly small in the metric[^kris], and that the charge product $qQ$ is instead non-zero. But there is nothing in the mathematics that prevents us from exploring this class of spacetimes, so we will press on.
 
 Plotting the value of the constraint equation for different $\Omega_\phi$ for two different spins:
 
@@ -173,7 +173,7 @@ I have coloured the line corresponding to $q = 1$ for $a = 0.4$ orange to emphas
 
 ## Energy and ISCO
 
-Here we will use the [method outlined previously](posts/2022.05.09.plunging-photons/#determining_the_isco) for determining the ISCO, using the same minima finding method in the energy expression. We must note however that the energy and angular momentum are from the canonical four-momenta, which is modified under the influence of the electromagnetic potential as described in [Tursunov, Zdeněk, and Kološ (2016)](#fndef:tursovon)[^tursunov] for an external magnetic field, and [Carter (1968)](#fndef:carter)[^carter] for the general class of Kerr metrics.
+Here we will use the [method outlined previously](posts/2022.05.09.plunging-photons/#determining_the_isco) for determining the ISCO, using the same minima finding method in the energy expression. The energy and angular momentum are from the canonical four-momenta, which is modified under the influence of the electromagnetic potential, as described in [Tursunov, Zdeněk, and Kološ (2016)](#fndef:tursovon)[^tursunov] for an external magnetic field, and [Carter (1968)](#fndef:carter)[^carter] for the general class of Kerr metrics.
 
 Quickly re-deriving the canonical momenta from the Lagrangian
 
@@ -194,7 +194,9 @@ $$
 \pi_\nu = g_{\nu\mu}\dot{x}^\mu - q A_\nu = \dot{x}_\nu - q A_\nu.
 $$
 
-We therefore identify as usual $E = -\pi_t$ and $L_z = \pi_\phi$ as constants of motion, and 
+There is here an ambiguity in the sign of $A_\nu$ as it enters in the above equations. I am using the same convention as Hackmann et al. here, which is in contrast to e.g. Carter. I must admit I do not quite understand the origin of this discrepancy, but the differing results are dramatic.
+
+We identify as usual $E = -\pi_t$ and $L_z = \pi_\phi$ as constants of motion, and 
 
 $$
 \therefore \quad E = -(\dot{x}_t - q A_t), \quad \text{and} \quad L_z = (\dot{x}_\phi - q A_\phi).
@@ -217,7 +219,7 @@ Plotting the ISCO as a function of charge product $qQ$:
 
 ![](./charged-iscos.svg)
 
-At $qQ = 1$, both curves are divergent and $r_\text{ISCO} \rightarrow \infty$. For negative charge products the ISCO is increases -- this is equivalent to an additional attractive force, or an effective increase in gravitational potential, pulling on the particle. Orbits that were once stable are no longer, and hence $r_\text{ISCO}$ increases.
+At $qQ = 1$, both curves are divergent and $r_\text{ISCO} \rightarrow \infty$. For negative charge products the ISCO increases -- this is equivalent to an additional attractive force, or an effective increase in gravitational potential, pulling on the particle. Orbits that were once stable are no longer, and hence $r_\text{ISCO}$ increases.
 
 For positive charge products, the ISCO initially decreases, reaching a minima, before increasing rapidly. The initial decrease may be thought of as the repulsion holding up the orbit and weakening the gravitational potential, allowing previously unstable orbits to become stable. The subsequent increase is interpreted as the EM repulsion overpowering gravity, suppressing the gravitational term in eq. \eqref{eq:geod}.
 
@@ -231,11 +233,11 @@ Plotting the analytic method (dashed) and the points determined by the circular 
 
 ![](./el-plot-1.svg)
 
-Very good agreement is seen between the methods. This can also be used to more accurately determine the ISCO for the circular orbit solver, as sometimes the integrator is "too good" and classifies some unstable / marginally bound orbits as stable circular. These plots clearly identify the location of the ISCO energetically.
+Agreement is seen between the methods. This can also be used to more accurately determine the ISCO for the circular orbit solver, as sometimes the integrator is "too good" and classifies some unstable / marginally bound orbits as stable circular. These plots clearly identify the location of the ISCO energetically.
 
 ## Line profiles
 
-The redshift is calculated using the regular
+The effects of GR on the redshift is calculated using the ratio of energies
 
 $$
 g := \frac{\left. k^\nu u_{\nu} \right\rvert_{\text{obs}}}{\left. k^\mu u_\mu \right\rvert_\text{disc}},
@@ -293,13 +295,12 @@ The effect is somewhat similar to changing the inclination of the observer:
 
 The above is for the Schwarzschild case only.
 
-A "more realistic" scenario anticipates $Q$ to be very small, but could still allow $qQ \sim 1$. We can approximate this by setting e.g. $Q \approx 10^{-16}$ and $q \approx 10^{16}$, so that the charge does not affect the spacetime, and enters the model only through the Lorentz force in the geodesic equation.
+A "more realistic" scenario anticipates $Q$ to be very small, but could still allow $qQ \sim 1$. We can approximate this by setting e.g. $Q \approx 10^{-16}$ and $q \approx 10^{16}$, so that $Q$ does not affect the spacetime, and enters the model only through the Lorentz force in the geodesic equation.
 
 ![](./low-charge-line-profiles.svg)
 
-Now the Schwarzschild and $qQ = 0$ case correspond exactly, but the dramatic effect of the charge is still very apparent.
+The Schwarzschild and $qQ = 0$ case correspond exactly, but the effect of the charge is still very apparent.
 
-## Conclusion
 
 ## References
 
