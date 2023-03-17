@@ -299,7 +299,7 @@ A "more realistic" scenario anticipates $Q$ to be very small, but could still al
 
 ![](./low-charge-line-profiles.svg)
 
-The Schwarzschild and $qQ = 0$ case correspond exactly, but the effect of the charge is still very apparent.
+The Schwarzschild and $qQ = 0$ case correspond exactly, but the effects of the charge are still very apparent.
 
 
 ## References
