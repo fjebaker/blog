@@ -22,7 +22,7 @@ $$
 $$
 
 
-Implementing the metric itself is straight forward, allowing for a new class of metric to be traced, namely those with non-zero charge per unit mass $q$. These are the particles which interact electromagnetically with the central singularity. We consider only time-like geodesics with charge.
+Implementing the metric itself is straight forward, allowing for a new class of geodesic to be traced, namely those with non-zero charge per unit mass $q$. These are the particles which interact electromagnetically with the central singularity. We consider only time-like geodesics with charge.
 
 These have been discussed in a number of papers, for example [Schroven, Hackmann and Lämmerzahl (2017)](#fndef:kris)[^kris], which studies in detail the innermost stable circular orbit (ISCO) for different charge configuration, and the effect this has on accreting matter of negative (electrons) and positive charge (protons/ions). There is also the earlier paper by [Hackmann and Xu (2013)](#fndef:hackmann)[^hackmann], which explores more generally the orbits of charged particles in the Kerr-Newman spacetime and classifies them to describe their behaviour. These works, and references therein, use the Hamilton-Jacobi formalism with the Carter constant to calculate an effective potential on the four-velocity components, and use this to infer stable (circular) orbits and the ISCO. I would instead like to study this from a step back, directly from the 2nd order geodesic equation, using modern numerical methods. This means adding an Ansatz for the Lorentz force
 
