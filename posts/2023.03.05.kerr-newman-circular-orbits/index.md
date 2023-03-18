@@ -58,7 +58,7 @@ $$
 
 This means there are only 4 unique non-zero components of the anti-symmetric tensor, namely $F_{rt}, F_{\theta t}, F_{r\phi}, F_{r\theta}$, with the other 4 being their anti-symmetric counterparts.
 
-It is worth noting that with this potential, one must only consider the product of the particle and black hole charge $qQ$ in the equations of motion, since there are no terms that depend solely on $q$ or $Q$. There are therefore 2 classes of solution we can expect depending on the sign of $qQ$. Similarly in the metric, only terms with $Q^2$ appear and consequently the parity is also lost. We therefore restrict ourselves to $Q \geq 0$ and allowing $q$ to take both negative and positive values without loss of generality.
+It is worth noting that with this potential, one must only consider the product of the particle and black hole charge $qQ$ in the equations of motion, since there are no terms that depend solely on $q$ or $Q$. There are therefore 2 classes of solution we can expect depending on the sign of $qQ$. Similarly in the metric, only terms with $Q^2$ appear and consequently the parity is lost. We therefore restrict ourselves to $Q \geq 0$ and allowing $q$ to take both negative and positive values without loss of generality.
 
 ## Keplerian angular velocity
 
