@@ -1,4 +1,4 @@
-using Dates 
+using Dates
 using Base
 
 # global consts
@@ -45,13 +45,18 @@ function BlogPost(f)
 
     BlogPost(
         # trim off the `.md` extension
-        replace(f, POSTS_MAIN[1:end-3] => ""), author, title, summary, date, tags
+        replace(f, POSTS_MAIN[1:end-3] => ""),
+        author,
+        title,
+        summary,
+        date,
+        tags,
     )
 end
 
 function _get_posts()
     # get all subdirectories
-    subdirs = filter(isdir, readdir(POSTS_DIRECTORY, join=true))
+    subdirs = filter(isdir, readdir(POSTS_DIRECTORY, join = true))
     # filter those which contain a `POSTS_MAIN` file
     post_subdirs = filter(subdirs) do d
         files = readdir(d)
@@ -86,7 +91,7 @@ end
 
 function hfun_posts_chronological(n)
     posts = _get_posts()
-    sort!(posts; rev=true)
+    sort!(posts; rev = true)
 
     last_index = min(parse(Int, first(n)), length(posts))
     posts = posts[1:last_index]

@@ -2,11 +2,11 @@ using Colors
 using Random
 Random.seed!(42)
 
-@memoize _tag_color(tag) = "#" * hex(HSV(floor(Int, rand() * 1000), 1, 1)) 
+@memoize _tag_color(tag) = "#" * hex(HSV(floor(Int, rand() * 1000), 1, 1))
 
 function _get_all_tags()
     tags = [i[1] => length(i[2]) for i in globvar("fd_tag_pages")]
-    sort!(tags; by=last, rev=true)
+    sort!(tags; by = last, rev = true)
     tags
 end
 
@@ -17,7 +17,8 @@ end
 
 @delay function hfun_all_tag_list()
     tags = _get_all_tags()
-    fmt_tags = [(format_tag(t), "$count post" * (count == 1 ? "" : "s")) for (t, count) in tags]
+    fmt_tags =
+        [(format_tag(t), "$count post" * (count == 1 ? "" : "s")) for (t, count) in tags]
     html_tags = ["<li> $(t) ($(count)) </li>" for (t, count) in fmt_tags]
     return "<ul>" * join(html_tags, "\n") * "</ul>"
 end
@@ -32,11 +33,9 @@ function hfun_postcard_taglist()
     tag = locvar(:fd_tag)
     rpaths = globvar("fd_tag_pages")[tag]
     posts = _get_posts_from_files(rpaths)
-    sort!(posts; rev=true)
+    sort!(posts; rev = true)
 
-    return join(
-        format_summary.(posts), "\n"
-    )
+    return join(format_summary.(posts), "\n")
 end
 
 @delay function hfun_maketitle()
@@ -50,7 +49,7 @@ end
     else
         ""
     end
-    
+
     return """
     <div class="post-title">
     <h1> $title </h1>
